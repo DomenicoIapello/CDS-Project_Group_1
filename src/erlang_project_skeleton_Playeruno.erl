@@ -7,35 +7,37 @@ start() ->
 
 ttt() ->
     receive
-        {b,b,b,_} -> 
+        {1,1,1,_} -> 
             frontend:send(jiffy:encode("Player 1 has won")),
             ttt().
 
-        {b,_,_,b,_,_,b,_} ->
+        {1,_,_,1,_,_,1,_} ->
             frontend:send(jiffy:encode("Player 1 has won")),
             ttt().
 
-        {_,b,_,_,b,_,_,b,_} ->
+        {_,1,_,_,1,_,_,1,_} ->
             frontend:send(jiffy:encode("Player 1 has won")),
             ttt().
 
-        {_,_,b,_,_,b,_,_,b} -> 
+        {_,_,1,_,_,1,_,_,1} -> 
             frontend:send(jiffy:encode("Player 1 has won")),
             ttt().
 
-        {_,_,_,b,b,b,_,_,_} ->
+        {_,_,_,1,1,1,_,_,_} ->
             frontend:send(jiffy:encode("Player 1 has won")),
             ttt().
 
-        {_,_,_,_,_,_,b,b,b} ->
+        {_,_,_,_,_,_,1,1,1} ->
             frontend:send(jiffy:encode("Player 1 has won")),
             ttt().
 
-        {b,_,_,_,b,_,_,_,b} ->
+        {1,_,_,_,1,_,_,_,1} ->
             frontend:send(jiffy:encode("Player 1 has won")),
             ttt().
 
-        {_,_,b,_,b,_,b,_,_} ->
+        {_,_,1,_,1,_,1,_,_} ->
             frontend:send(jiffy:encode("Player 1 has won")),
             ttt()
+        {basecase} ->
+            frontend:send(jiffy:encode("No"))
     end.

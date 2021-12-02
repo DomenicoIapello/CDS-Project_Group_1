@@ -38,6 +38,6 @@ ttt() ->
         {_,_,2,_,2,_,2,_,_} ->
             frontend:send(jiffy:encode("Player 2 has won")),
             ttt()
-        {basecase}
-            frontend:send(jiffy:encode("Player 2 has won"))
+        {basecase} ->
+            frontend:send(jiffy:encode("no"))
     end.
