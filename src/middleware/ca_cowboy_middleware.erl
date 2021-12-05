@@ -5,6 +5,7 @@
 -export([execute/2]).
 
 execute(Req, Env) ->
+    io:fwrite("[middleware]:execute()...~n", []),
     {ok, ReqWithCorsHeaders} = set_cors_headers(Req),
     {ok, ReqWithCorsHeaders, Env}.
 
@@ -13,6 +14,7 @@ execute(Req, Env) ->
 %% ===================================================================
 
 set_headers(Headers, Req) ->
+    io:fwrite("[middleware]:set_headers()...~n", []),
     ReqWithHeaders = lists:foldl(fun ({Header, Value},
                                       ReqIn) ->
                                          ReqWithHeader =
@@ -26,6 +28,7 @@ set_headers(Headers, Req) ->
     {ok, ReqWithHeaders}.
 
 set_cors_headers(Req) ->
+    io:fwrite("[middleware]:set_cors_headers()...~n", []),
     Headers = [{<<"access-control-allow-origin">>, <<"*">>},
                {<<"access-control-allow-methods">>,
                 <<"POST, GET, OPTIONS">>},
