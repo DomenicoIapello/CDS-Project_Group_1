@@ -22,11 +22,20 @@ function sendFile(filename, contentType, res) {
     });
 }
 
-function backendPostJSON(backendURL){
+function backendGetJSON(backendURL){
     console.log("Trying to get some GET answer...");
     axios.get(backendURL).then(resp => {
         console.log("My data is: ", resp.data);
     });
+}
+
+function backendPostJson(backendURL) {
+    let payload = {"P1Move": 'X___X___X'};
+
+    let res = axios.post(backendURL, payload);
+
+    let data = res.data;
+    console.log(data);
 }
 
 // SERVER
@@ -46,7 +55,8 @@ server.listen(port, function(error) {
     if (error) {
         console.log('Something went wrong' + error)
     } else {
-        backendPostJSON(backendURL);
+        backendGetJSON(backendURL);
+        backendPostJson(backendURL);
         console.log('Everything is working fine on port ' + port)
     }
 })
