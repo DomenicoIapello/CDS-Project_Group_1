@@ -1,20 +1,9 @@
-Erlang Project Skeleton
-=====
-First install rebar3 by following the [Getting started guide](https://rebar3.readme.io/docs/getting-started) in rebar3 documentation.
+# Distributed Tic Tac Toe
 
-Get dependencies
+Description
 -----
+The project is a Distributed Tic Tac Toe that can be played in a browser.
 
-    $ rebar3 get-deps
-Build
------
-
-    $ rebar3 compile
 Run
 -----
-
-    $ rebar3 shell
-
-Make sure health is ok
------
-[http://localhost:8080/health](http://localhost:8080/health)
+Follow the README respectively for the [backend](./backend/README.md) and the [frontend](./frontend/README.md).
