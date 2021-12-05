@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function(){
     
         current = 1 - current; //set the current player to the other player for the next round
 
-        document.querySelector('#Player').innerText = 'Its the turn of Player ' + players[current]; //display whos turn it is
+        document.querySelector('#Player').innerText = 'It\'s the turn of Player ' + players[current]; //display whos turn it is
 
         cells = cells + 1; //rise the number of cells clicked
 
@@ -36,22 +36,24 @@ document.addEventListener('DOMContentLoaded', function(){
         if(cells == 9) {
             document.querySelector('#Player').innerText = 'No Player has won, no more empty cells';
         }
+
+        if(data[0] == 1 && data[4] == 1 && data[8] == 1){
+            document.querySelector('#Player').innerText = p1win();
+        }
+
+        //put the data array in a JSON format
+        var datainjson = JSON.stringify(data);
+        // HTTP POST to backend
+        document.querySelector('#backenddata').innerText = '(We should be) sending to backend: ' + datainjson;
+        return datainjson;
+    }
+    
+    function p1win(){
+        return 'You\'re the champion! Congratulations!';
     }
 
-    //put the data array in a JSON format
-    var datainjson = JSON.stringify(data);
-    
-    //create a new HTTP request which can be fetched by the cowboy REST service
-    //(source:https://stackoverflow.com/questions/36975619/how-to-call-a-rest-web-service-api-from-javascript)
-    function sendData() {
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-             if (this.readyState == 4 && this.status == 200) {
-                 alert(this.responseText);
-             }
-        };
-        xhttp.open("POST", "Localhost:8080", true);
-        xhttp.setRequestHeader("Content-type", "application/json");
-        xhttp.send(datainjson);
+    function test(){
+        const axios = require('axios');
+        return "salut";
     }
 })
