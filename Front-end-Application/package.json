@@ -1,0 +1,24 @@
+{
+    "name": "NailIT",
+    "version": "1.0.0",
+    "description": "NailIT",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron ."
+    },
+    "build": {
+        "appId": "ch.nailit.store"
+    },
+    "author": "Fabio Rudolph & Marcel Bühlmann",
+    "license": "ISC",
+    "devDependencies": {
+        "electron": "^9.4.4",
+        "electron-builder": "^22.6.1",
+        "mysql": "^2.18.1"
+    },
+    "dependencies": {
+        "mysql": "2.18.1",
+        "node": "^14.2.0",
+        "server": "^1.0.27"
+    }
+}
