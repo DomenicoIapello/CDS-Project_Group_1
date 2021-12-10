@@ -1,10 +1,16 @@
+%%%-------------------------------------------------------------------
+%% @doc Player One Process/Worker
+%%
+%%
+%% @end
+%%%-------------------------------------------------------------------
 -module(playerone_process).
 
 -behaviour(gen_server). % https://www.erlang.org/doc/man/gen_server.html
 
 -export([start/0, get/1, post/2]).
-
 -export([init/1, handle_cast/2, handle_call/3, terminate/2]).
+-export([ttt/0]).
 
 %
 % wrappers:
@@ -61,3 +67,50 @@ handle_cast(_Message, Grid) ->
 terminate(_Reason, _Grid) ->
     io:fwrite("[playerone_process.erl] terminate.~n", []),
     ok.
+
+
+%
+% Game Logic: process for player one
+%
+
+% idea to start/spawn ttt:
+% start() ->
+%    register(puno, spawn(?module, ttt(), {})),
+%    supervisor ! {"ready"}.
+
+ttt() ->
+    receive
+        {1,1,1,_} -> 
+            supervisor ! {"Player 1 has won"},
+            ttt();
+
+        {1,_,_,1,_,_,1,_} ->
+            supervisor ! {"Player 1 has won"},
+            ttt();
+
+        {_,1,_,_,1,_,_,1,_} ->
+            supervisor ! {"Player 1 has won"},
+            ttt();
+
+        {_,_,1,_,_,1,_,_,1} -> 
+            supervisor ! {"Player 1 has won"},
+            ttt();
+
+        {_,_,_,1,1,1,_,_,_} ->
+            supervisor ! {"Player 1 has won"},
+            ttt();
+
+        {_,_,_,_,_,_,1,1,1} ->
+            supervisor ! {"Player 1 has won"},
+            ttt();
+
+        {1,_,_,_,1,_,_,_,1} ->
+            supervisor ! {"Player 1 has won"},
+            ttt();
+
+        {_,_,1,_,1,_,1,_,_} ->
+            supervisor ! {"Player 1 has won"},
+            ttt();
+        {_,_,_,_,_,_,_,_,_} ->
+            supervisor ! {"No for Player 1"}
+    end.

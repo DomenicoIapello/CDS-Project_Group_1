@@ -1,3 +1,13 @@
+%%%-------------------------------------------------------------------
+%% @doc Middleware for our REST API
+%%
+%% The module cowboy_middleware defines a callback interface for Cowboy middlewares.
+%% Middlewares process the request sequentially in the order they are configured.
+%%
+%% official doc: https://ninenines.eu/docs/en/cowboy/2.9/manual/cowboy_middleware/
+%%
+%% @end
+%%%-------------------------------------------------------------------
 -module(ca_cowboy_middleware).
 
 -behaviour(cowboy_middleware).
