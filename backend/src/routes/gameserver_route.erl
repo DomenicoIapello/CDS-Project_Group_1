@@ -9,7 +9,7 @@
 -behaviour(cowboy_rest).
 
 -export([init/2, allowed_methods/2, content_types_provided/2, content_types_accepted/2]).
--export([get_move/2, post_move/2, known_methods/2]).
+-export([get_stalemate_status/2, multicast_current_grid/2, known_methods/2]).
 
 %
 % INIT
@@ -32,23 +32,25 @@ allowed_methods(Req, State) ->
 
 content_types_provided(Req, State) ->
     io:fwrite("[gameserver_route.erl]:content_types_provided()...~n", []),
-    {[{{<<"application">>, <<"json">>, []}, get_move}],
+    {[{{<<"application">>, <<"json">>, []}, get_stalemate_status}],
      Req,
      State}.
 
 content_types_accepted(Req, State) ->
     io:fwrite("[gameserver_route.erl]:content_types_accepted()...~n", []),
-    {[{{<<"application">>, <<"json">>, []}, post_move}],
-     Req,
-     State}.
+    {
+        [{{<<"application">>, <<"json">>, []}, multicast_current_grid}],
+        Req,
+        State
+    }.
 
 %
 % GET / POST
 %
-get_move(Req0, State0) ->
-    io:fwrite("[gameserver_route.erl]:get_move()....~n", []),
+get_stalemate_status(Req0, State0) ->
+    io:fwrite("[gameserver_route.erl]:get_stalemate_status()....~n", []),
     QsVals = cowboy_req:parse_qs(Req0),
-    io:fwrite("[gameserver_route.erl]:get_move(): parsed query=~p.~n", [QsVals]),
+    io:fwrite("[gameserver_route.erl]:get_stalemate_status(): parsed query=~p.~n", [QsVals]),
     case lists:keyfind(<<"P2Move">>, 1, QsVals) of
         {_, <<"O___O___O">>} ->
             Message = {[{validmove, <<"Player 2 made a valid move!">>}]};
@@ -62,11 +64,11 @@ get_move(Req0, State0) ->
     io:fwrite("[gameserver_route.erl] QsVals is: ~p.~n", [QsVals]),
     {jiffy:encode(Message), Req0, State0}.
 
-post_move(Req0, _State0) ->
-    io:fwrite("[gameserver_route.erl]:post_move()...~n", []),
+multicast_current_grid(Req0, _State0) ->
+    io:fwrite("[gameserver_route.erl]:multicast_current_grid()...~n", []),
     {ok, EncodedData, _} = cowboy_req:read_body(Req0),
     DecodedData = jiffy:decode(EncodedData),
-    io:fwrite("[gameserver_route.erl] post_move has decodedata: ~p.~n", [DecodedData]),
+    io:fwrite("[gameserver_route.erl] multicast_current_grid has decodedata: ~p.~n", [DecodedData]),
 
     {Reply, Code} = {{response, <<"wins">>}, 206},
     EncodedReply = jiffy:encode({[Reply]}),

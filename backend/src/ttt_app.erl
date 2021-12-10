@@ -24,6 +24,7 @@
 -export([test_scenario_1/0]).
 
 start(_StartType, _StartArgs) ->
+    io:fwrite("Tic-Tac-Toe starting... (pid: ~p)~n", [self()]),
     % Compile routes to the resources:
     % takes a human readable list of routes and transforms it into a form more efficient to process.
     Dispatch = cowboy_router:compile([{'_',
@@ -32,7 +33,7 @@ start(_StartType, _StartArgs) ->
                                        {"/playertwo", playerone_route, []},
                                        {"/gameserver", gameserver_route, []}]}]),
     
-    io:fwrite("\n[app]Dispatch done.~n", []),
+    io:fwrite("\n[app] Cowboy compiled routes to the resources.~n", []),
     
     % Listener:
     % Listen for connections using plain TCP
@@ -44,20 +45,18 @@ start(_StartType, _StartArgs) ->
                                         ca_cowboy_middleware,
                                         cowboy_handler]}),
 
-    io:fwrite("[app]Cowboy Start Clear done.~n", []),
-
-    % TESTING
-    %test_scenario_1(),
+    io:fwrite("[app] Cowboy is listening for connections using TCP...~n", []),
 
     ttt_sup:start_link().
+    
+    % TESTING
+    % test_scenario_1().
 
 stop(_State) -> 
-    io:fwrite("[app] about to stop the app.~n", []),
+    io:fwrite("[app] App stopped. Cleaning anything remaining...~n", []),
     ok = cowboy:stop_listener(http).
 
 %% internal functions
 test_scenario_1() ->
-    playerone_process:post(<<"PlayerOne">>, <<"____X____">>),
-    io:fwrite("[app]PlayerOne moved.~n", []),
-    playertwo_process:post(<<"PlayerTwo">>, <<"_O__X____">>),
-    io:fwrite("[app]PlayerTwo moved.~n", []).
+    Stalemate_status = gameserver_process:stalemate(),
+    io:fwrite("[app] the stalemate status is: ~p.~n", [Stalemate_status]).

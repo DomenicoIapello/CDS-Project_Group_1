@@ -29,13 +29,13 @@
 -spec start_link() -> {ok, pid()}.
 
 start_link() ->
-    io:fwrite("[sup]:start()...~n", []),
+    io:fwrite("[sup] Starting top supervisor of our app...(pid: ~p)~n", [self()]),
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 %% supervisor.
 
 init([]) ->
-    io:fwrite("[sup]:init()...~n", []),
+    io:fwrite("[sup] creating the supervision tree...~n", []),
     Procs = [
         {gameserver_process, {gameserver_process, start, []}, permanent, 1, worker, [gameserver_process]},
         {playerone_process, {playerone_process, start, []}, permanent, 1, worker, [playerone_process]},
