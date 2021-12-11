@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function(){
     var cells = 0; //variable to check if another cell is empty
     const data = [0,0,0,0,0,0,0,0,0]; //data of cells 0=not chosen, 1=chosen by player1, 2=chosen by player2
     var datainjson = "{uba}";
+    var display = "";
 
     function markCell(c) {
         var cell = c.target; //get the clicked cell
@@ -48,18 +49,22 @@ document.addEventListener('DOMContentLoaded', function(){
         var url = "http://ptsv2.com/t/vh7me-1638884442/post";
         dataPost.open("POST", url, false);
         dataPost.send(datainjson);
-        dataPost.onreadystatechange = function(){
-            if(dataPost.readyState == dataPost.DONE && dataPost.status == 200){     
-                var result = JSON.parse(dataPost.responseText);
-            }
-            document.querySelector('#Player').innerText = result;
-        }
+                var result = dataPost.responseText;
+                display = "test";
+                if(result == "1,0,0" || result == "1,0,1"){
+                    display = "Player 1 has won";
+                } else if (result == "0,1,0" || result  == "0,1,1" ){
+                    display = "Player 2 has won";
+                } else {
+                    display = "No player has won and no more empty cells are available. It's a tie"
+                }
+
+            document.querySelector('#Player').innerText = display;
+
         //to here
+        document.querySelector('#backenddatasend').innerText = datainjson;
+        document.querySelector('#backenddatareceive').innerText = result;
 
-
-
-
-        document.querySelector('#backenddata').innerText = datainjson;
     }
 
     if(data[0] == 1 && data[4] == 1 && data[8] == 1){
