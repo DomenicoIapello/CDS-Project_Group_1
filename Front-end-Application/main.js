@@ -33,7 +33,7 @@ app.on('window-all-closed', function(){
 });
 
 app.on('ready', function(){
-    mainWindow = new BrowserWindow({width: 1600, height: 1400});
+    mainWindow = new BrowserWindow({width: 1200, height: 1400});
     url = 'file://' + __dirname + '/frontend.html';
     mainWindow.loadURL(url);
     mainWindow.on('closed', function(){
