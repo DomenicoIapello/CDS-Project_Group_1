@@ -1,6 +1,8 @@
 %%%-------------------------------------------------------------------
 %% @doc Game Server Route
-%%
+%% 
+%% 
+%% documentation of cowboy_rest's behaviour: https://ninenines.eu/docs/en/cowboy/2.9/manual/cowboy_rest/
 %%
 %% @end
 %%%-------------------------------------------------------------------
@@ -8,72 +10,174 @@
 
 -behaviour(cowboy_rest).
 
--export([init/2, allowed_methods/2, content_types_provided/2, content_types_accepted/2]).
--export([get_stalemate_status/2, multicast_current_grid/2, known_methods/2]).
+-export([init/2, known_methods/2, allowed_methods/2, content_types_provided/2, content_types_accepted/2]).
+-export([response_to_get/2, response_to_post/2]).
 
-%
-% INIT
-%
 
-% the Req0 (or Req later on) is a request object. It contains info about request, and
-% will eventually contain info that is sent back to the browser.
+%%% ==========================================================================
+%%% Initialize REST handler behavior
+%%% ==========================================================================
+
+%% -------------------------------------------------------------------------
+%% @doc
+%% init/2 returns cowboy_rest in its tuple answer to switch to REST handler behavior.
+%%
+%% @spec content_types_provided(Req, State) -> {Result, Req, State}
+%% @end
+%% -------------------------------------------------------------------------
 init(Req0, State) -> 
-    io:fwrite("[gameserver_route.erl]:init()...~n", []),
+    io:fwrite("[gameserver_route.erl]:init() switches to REST handler behavior...~n", []),
     {cowboy_rest, Req0, State}.  
 
+%% -------------------------------------------------------------------------
+%% @doc
+%% Return the list of known methods.
+%%
+%% This is the full list of methods known by the server, 
+%% regardless of their use in the resource.
+%%
+%% @spec known_methods(Req, State) -> {Result, Req, State}
+%% @end
+%% -------------------------------------------------------------------------
 known_methods(Req, State) ->
-    io:fwrite("[gameserver_route.erl]:known_methods()...~n", []),
+    io:fwrite("[gameserver_route.erl]:known_methods() are returned.~n", []),
     Result = [<<"GET">>, <<"POST">>],
     {Result, Req, State}.
 
+%% -------------------------------------------------------------------------
+%% @doc
+%% Return the list of allowed methods
+%%
+%% @spec allowed_methods(Req, State) -> {Result, Req, State}
+%% @end
+%% -------------------------------------------------------------------------
 allowed_methods(Req, State) ->
-    io:fwrite("[gameserver_route.erl]:allowed_methods()...~n", []),
+    io:fwrite("[gameserver_route.erl]:allowed_methods() are returned.~n", []),
     {[<<"GET">>, <<"POST">>], Req, State}.
 
+%% -------------------------------------------------------------------------
+%% @doc
+%% The media types that we return to the frontend based on a HTTP GET request
+%%
+%% @spec content_types_provided(Req, State) -> {Result, Req, State}
+%% @end
+%% -------------------------------------------------------------------------
 content_types_provided(Req, State) ->
-    io:fwrite("[gameserver_route.erl]:content_types_provided()...~n", []),
-    {[{{<<"application">>, <<"json">>, []}, get_stalemate_status}],
-     Req,
-     State}.
-
-content_types_accepted(Req, State) ->
-    io:fwrite("[gameserver_route.erl]:content_types_accepted()...~n", []),
+    io:fwrite("[gameserver_route.erl]:content_types_provided() to a GET.~n", []),
     {
-        [{{<<"application">>, <<"json">>, []}, multicast_current_grid}],
+        [{{<<"application">>, <<"json">>, []}, response_to_get}],
         Req,
         State
     }.
 
-%
-% GET / POST
-%
-get_stalemate_status(Req0, State0) ->
-    io:fwrite("[gameserver_route.erl]:get_stalemate_status()....~n", []),
+%% -------------------------------------------------------------------------
+%% @doc
+%% The media types that we accept from the frontend based on a HTTP POST request
+%%
+%% @spec content_types_provided(Req, State) -> {Result, Req, State}
+%% @end
+%% -------------------------------------------------------------------------
+content_types_accepted(Req, State) ->
+    io:fwrite("[gameserver_route.erl]:content_types_accepted() from a POST.~n", []),
+    {
+        [{{<<"application">>, <<"json">>, []}, response_to_post}],
+        Req,
+        State
+    }.
+
+
+
+%%% ==========================================================================
+%%% Handling the GET / POST
+%%% ==========================================================================
+
+%% -------------------------------------------------------------------------
+%% @doc
+%% 
+%%
+%% @spec 
+%% @end
+%% -------------------------------------------------------------------------
+response_to_get(Req0, State0) ->
+    io:fwrite("[gameserver_route.erl]:response_to_get()....~n", []),
     QsVals = cowboy_req:parse_qs(Req0),
-    io:fwrite("[gameserver_route.erl]:get_stalemate_status(): parsed query=~p.~n", [QsVals]),
-    case lists:keyfind(<<"P2Move">>, 1, QsVals) of
-        {_, <<"O___O___O">>} ->
-            Message = {[{validmove, <<"Player 2 made a valid move!">>}]};
-        {_, <<"O________">>} ->
-            Message = {[{winningmove, <<"Player 2 is the winner!">>}]};
-        {_, _} ->
-            Message = {[{invalidmove, <<"Please reconsider your move. It is invalid.">>}]};
-        false -> 
-            Message = {[{error, <<"URL or Route not correct. Please verify your input.">>}]}
-    end,
-    io:fwrite("[gameserver_route.erl] QsVals is: ~p.~n", [QsVals]),
-    {jiffy:encode(Message), Req0, State0}.
+    io:fwrite("[gameserver_route.erl]:response_to_get(): parsed query=~p.~n", [QsVals]),
 
-multicast_current_grid(Req0, _State0) ->
-    io:fwrite("[gameserver_route.erl]:multicast_current_grid()...~n", []),
-    {ok, EncodedData, _} = cowboy_req:read_body(Req0),
-    DecodedData = jiffy:decode(EncodedData),
-    io:fwrite("[gameserver_route.erl] multicast_current_grid has decodedata: ~p.~n", [DecodedData]),
-
-    {Reply, Code} = {{response, <<"wins">>}, 206},
+    {_, Current_Grid} = gameserver_process:get_intial_grid(),
+    Reply = {current_grid, Current_Grid},
+    io:fwrite("[gameserver_route.erl] Reply to encode is: ~p.~n", [Reply]),
     EncodedReply = jiffy:encode({[Reply]}),
+    io:fwrite("[gameserver_route.erl] QsVals is: ~p.~n", [EncodedReply]),
+    {EncodedReply, Req0, State0}.
 
+%% -------------------------------------------------------------------------
+%% @doc
+%% 
+%% To respond to a HTTP POST request from the frontend, the backend do
+%% 1) decodes the JSON data into an Erlang data structure
+%% 2) send the Erlang data to the backend process (gameserver, also called distributor in our doc/schema)
+%% 3) send an answer back to the frontend as a JSON: {player_one_status, player_2_status, stalemate_status},
+%%    each a binary (0 or 1)
+%%
+%% @spec 
+%% @end
+%% -------------------------------------------------------------------------
+response_to_post(Req0, _State0) ->
+    % Read and decode JSON data into Erlang data
+    {ok, EncodedData, _} = cowboy_req:read_body(Req0),
+    DecodedData = jiffy:decode(EncodedData),  % DecodedData = {[{<<.>>, <<.>>}]} = a tuple {} containing a list [] containg a tuple {} with two bit strings <<>>.
+    Decoded_current_grid_as_integers = flatten_decoded_data(DecodedData),
+
+    % Filter out if DecodedData is "acceptable", TODO: add real control and different HTTP code (204, 206) ?
+    % if yes, use Erlang backend logic to analyze it.
+    case Decoded_current_grid_as_integers of
+        [_,_,_,_,_,_,_,_,_] ->
+            io:fwrite("[gameserver_route.erl] Analyze anything really .............~n", []),
+            % a good format response to analyze
+            {R, Code} = gameserver_process:analyze_post_request(Decoded_current_grid_as_integers),
+            io:fwrite("[gameserver_route.erl] gameserver_process analyzed the DecodedData, its answer is: ~p with code ~p.~n", [R, Code]),
+            Reply = {response, R}
+    end,
+
+    % Format back into JSON for the frontend
+    io:fwrite("-------- Reply to encode: ~p.~n", [Reply]),
+    EncodedReply = jiffy:encode({[Reply]}),
+    io:fwrite("-------- JSON Encoded Reply: ~p.~n", [EncodedReply]),
+    % Send response back to frontend to answer its initial POST request.
     cowboy_req:reply(Code,
                      #{<<"content-type">> => <<"application/json">>},
                      EncodedReply,
                      Req0).
+
+
+%%% ==========================================================================
+%%% Miscelleanous Helper Functions
+%%% ==========================================================================
+
+%% -------------------------------------------------------------------------
+%% @doc
+%% 
+%% The goal is the go from {[{<<"current_grid">>, <<"1,0,0,0,0,0,0,0,0">>}]} to [1,0,0,0,0,0,0,0,0]
+%%
+%%
+%% Remark: yes, there are too many prints to the console.
+%%
+%% @spec 
+%% @end
+%% -------------------------------------------------------------------------
+flatten_decoded_data(DecodedData) ->
+    % DecodedData = {[{<<.>>, <<.>>}]} = a tuple {} containing a list [] containg a tuple {} with two bit strings <<>>.
+    io:fwrite("[gameserver_route.erl] response_to_post has decodedata the data received from Frontend as: ~p.~n", [DecodedData]),
+    DecodedData_elem1 = element(1, DecodedData), % DecodedData_elem1 = [{<<.>>, <<.>>}]
+    io:fwrite("[gameserver_route.erl] response_to_post has DecodedData_elem1 the data received from Frontend as: ~p.~n", [DecodedData_elem1]),
+    [DecodedData_elem1_head | _DecodedData_elem1_body] = DecodedData_elem1, % DecodedData_elem1_head = {<<.>>, <<.>>}
+    io:fwrite("[gameserver_route.erl] response_to_post has DecodedData_elem1_head the data received from Frontend as: ~p.~n", [DecodedData_elem1_head]),
+
+    Decoded_current_grid = element(2, DecodedData_elem1_head), % Decoded_current_grid = <<.>>
+    io:fwrite("[gameserver_route.erl] response_to_post has Decoded_current_grid the data received from Frontend as: ~p.~n", [Decoded_current_grid]),
+    Decoded_current_grid_as_list = binary_to_list(Decoded_current_grid),
+    io:fwrite("[gameserver_route.erl] Decoded_current_grid_as_list : ~p.~n", [Decoded_current_grid_as_list]),
+    Decoded_current_grid_as_integers = [ element(1, string:to_integer(Substr)) || Substr <- string:tokens(Decoded_current_grid_as_list, ",")],
+    io:fwrite("[gameserver_route.erl] Decoded_current_grid_as_integers: ~p.~n", [Decoded_current_grid_as_integers]),
+
+    Decoded_current_grid_as_integers.

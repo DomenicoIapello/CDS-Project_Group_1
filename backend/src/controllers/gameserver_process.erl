@@ -4,13 +4,10 @@
 %% Responsible to manage the tic-tac-toe grid (create, say when it's a stalemate),
 %% and Multicast Updates (moves of each player, current grid to frontend).
 %%
-%% - The initial grid is created by the init() call. format ="_________", 
-%% one "_" per cell in the grid
-%%
-%% - Send message to frontend when grid is full and stalemate (not winner)
-%%
-%% - Send message to frontend and players when one of the two players wins (multicast).
-%%
+%% - can return an empty/initialized grid to the frontend (HTTP GET request by frontend)
+%% - analyze current grid received by the frontend (HTTP POST request by frontend)
+%% - multicast current grid to player processes to analyze if anyone win
+%% - analyze if grid has empty cells or not (stalemate => end game without winner)
 %%
 %%
 %% @end
@@ -21,24 +18,43 @@
 
 % API
 -export([start/0]).
+-export([analyze_post_request/1, get_intial_grid/0]).
 % Game Logic
 -export([send/1, distribute/1, bmulticast/1, sendToFrontEnd/1, datareceive/0]).
--export([stalemate/0, get_current_grid/0]).
 -export([check_stalemate/1]).
 % gen_server callbacks
--export([init/1, terminate/2]).
--export([handle_call/3, handle_cast/2]).
+-export([init/1, handle_call/3, handle_cast/2, terminate/2]).
 
 
 %%% ==========================================================================
 %%% API
 %%% ==========================================================================
-stalemate() ->
-    io:fwrite("[gameserver_process.erl] the grid is full, without any winner.~n", []),
-    gen_server:call(?MODULE, {stalemate}).
 
-get_current_grid() ->
-    gen_server:call(?MODULE, {get_current_grid}).
+%% -------------------------------------------------------------------------
+%% @doc
+%% The Frontend sends a POST request with current grid (i.e. DecodedData),
+%% that grid contains the last player's move.
+%%
+%% Here, the process needs to analyze the grid and give an answer on 
+%% - whether any of the player has won, and
+%% - if the grid is in a stalemate or not (i.e. at least one empty cell available)
+%%
+%% @spec
+%% @end
+%% -------------------------------------------------------------------------
+analyze_post_request(DecodedData) ->
+    io:fwrite("[gameserver_process.erl] Start analyzing DecodedData from POST request...~n", []),
+    gen_server:call(?MODULE, {DecodedData}).
+
+%% -------------------------------------------------------------------------
+%% @doc
+%% Provide answer to get 
+%%
+%% @spec
+%% @end
+%% -------------------------------------------------------------------------
+get_intial_grid() ->
+    gen_server:call(?MODULE, {}).
 
 %%% ==========================================================================
 %%% Game Logic for the Game Server
@@ -46,46 +62,48 @@ get_current_grid() ->
 %%% these logic are used by the handlers.
 %%% NO LOGIC should be directly implemented into the handlers.
 %%% ==========================================================================
-check_stalemate(current_grid) ->
-    io:format("We are about to check the grid ~p.~n", [current_grid]),
-    case lists:member($0, current_grid) of
-        true -> game_continue;
-        false -> stalemate
+check_stalemate(Current_Grid) ->
+    case lists:member(0, Current_Grid) of
+        true -> 1;  % empty cells available
+        false -> 0  % stalemate
     end.
 
 send(data) ->
     genserver:post(data).
 
-distribute(data) ->
-    datastream = jiffy:decode(data),
-    bmulticast(datastream).
+distribute(Current_Grid) ->
+    Player_answer = bmulticast(Current_Grid),
+    % io:format("simulate distribute stuff: ~p.~n", [Player_answer]),
+    Player_answer.
 
-bmulticast(datastream) ->
-    io:format(datastream).
+bmulticast(_Current_Grid) ->
+    % io:format("simulate bmulticast stuff...~p.~n", [Current_Grid]),
+    Player_answer = 0,
+    Player_answer.
 
-sendToFrontEnd(sendData) ->
+sendToFrontEnd(_SendData) ->
     io:format("We want to send to frondend: ").
 
 datareceive() ->
     receive
         {"Player 1 has won"} ->
-            sendData = jiffy:encode("Winner: Player 1"),
-            sendToFrontEnd(sendData),
+            SendData = ("Winner: Player 1"),
+            sendToFrontEnd(SendData),
             datareceive();
 
         {"No for Player 1"} ->
-            sendData = jiffy:encode("Next step for Player 2"),
-            sendToFrontEnd(sendData),
+            SendData = ("Next step for Player 2"),
+            sendToFrontEnd(SendData),
             datareceive();
 
         {"Player 2 has won"} ->
-            sendData = jiffy:encode("Winner: Player 2"),
-            sendToFrontEnd(sendData),
+            SendData = ("Winner: Player 2"),
+            sendToFrontEnd(SendData),
             datareceive();
 
         {"No for Player 2"} ->
-            sendData = jiffy:encode("Next step for Player 1"),
-            sendToFrontEnd(sendData),
+            SendData = ("Next step for Player 1"),
+            sendToFrontEnd(SendData),
             datareceive()
     end.
 
@@ -114,14 +132,15 @@ start() ->
 %% @doc
 %% Initialize the Game Server
 %%
-%% init() is called when a connection is made to the server
+%% init() is called when a connection is made to the server.
+%% Technically speaking, the "Grid" represent the internal State of the server.
 %%
 %% @spec
 %% @end
 %% -------------------------------------------------------------------------
 init([]) ->
     io:fwrite("[gameserver_process.erl] Grid initialized.~n", []),
-    Grid = "_________",
+    Grid = [0,0,0,0,0,0,0,0,0],
     {ok, Grid}.
 
 %% -------------------------------------------------------------------------
@@ -131,35 +150,44 @@ init([]) ->
 %% @spec
 %% @end
 %% -------------------------------------------------------------------------
-handle_call({stalemate}, _From, Grid) ->
-    io:fwrite("[gameserver_process.erl]:handle_call we have a stalemate. Game ends.~n", []),
-    Stalemate_status = check_stalemate(Grid),
-    Response = {Stalemate_status, Grid},
-    {reply, Response, Grid};
+handle_call({DecodedData}, _From, _Grid) ->
+    % _Grid represent the current grid that the server knows (internal state)
+    io:fwrite("[gameserver_process.erl]:handle_call multicasts and check for stalemate...~n", []),
+    NewGrid = DecodedData,  % assume/set the received grid (DecodedData) as the new state of the server (_Grid)
 
-handle_call({get_current_grid}, _From, Grid) ->
+    % multicast to player processes (to check if anyone has won)
+    PlayerOne_status = distribute(DecodedData), % call something, and return 0 (not win) or 1 (win)
+    PlayerTwo_status = distribute(DecodedData), % call something, and return 0 (not win) or 1 (win)
+    % check if grid has any empty cells or not (stalemate)
+    Stalemate_status = check_stalemate(DecodedData),
+
+    % waiting time to "ensure" players' answer are received
+    % timer:sleep(100)
+
+    % compile the answer from player processes and stalemate status
+    Response = [PlayerOne_status, PlayerTwo_status, Stalemate_status],
+    io:fwrite("[gameserver_process.erl]:response = ~p. (With 1 or 0, true/false, for {player one wins, player two wins, empty cells available}).~n", [Response]),
+    {reply, {Response, 201}, NewGrid};  
+
+handle_call({}, _From, Grid) ->
     Response = {current_grid, Grid},
     {reply, Response, Grid}.
 
 %% -------------------------------------------------------------------------
 %% @doc
-%% Handle cast messages
+%% Handle cast messages: implemented because it's required by gen_server 
+%%
 %%
 %% @spec
 %% @end
 %% -------------------------------------------------------------------------
 handle_cast(_Message, Grid) -> 
-    %
-    % implemented because it's required by gen_server 
-    %
-    % Whenever a gen_server process receives a request sent using cast/2 
-    % or abcast/2,3, this function is called to handle the request.
     io:fwrite("[gameserver_process.erl] handle cast - default no reply.~n", []),
-    {noreply, Grid}.  % required by gen_server
+    {noreply, Grid}.
 
 %% -------------------------------------------------------------------------
 %% @doc
-%% Clean up when the gen_server is terminated.
+%% Clean up remaining when the gen_server is terminated.
 %%
 %% @spec
 %% @end

@@ -17,7 +17,7 @@
 %
 start() ->
     % this function spawns and links to a new process, a gen_server.
-    io:fwrite("[playerone_process.erl] spawn process.~n", []),
+    io:fwrite("[playerone_process.erl] Spawning Player One...(pid: ~p).~n", [self()]),
     gen_server:start_link({local, ?MODULE},
                           ?MODULE,
                           [],

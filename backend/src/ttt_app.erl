@@ -21,10 +21,11 @@
 -behaviour(application).
 
 -export([start/2, stop/1]).
--export([test_scenario_1/0]).
+
+-define(PORT_BACKEND, 8080).
 
 start(_StartType, _StartArgs) ->
-    io:fwrite("Tic-Tac-Toe starting... (pid: ~p)~n", [self()]),
+    io:fwrite("Tic-Tac-Toe starting... (ttt_app pid: ~p)~n", [self()]),
     % Compile routes to the resources:
     % takes a human readable list of routes and transforms it into a form more efficient to process.
     Dispatch = cowboy_router:compile([{'_',
@@ -38,25 +39,19 @@ start(_StartType, _StartArgs) ->
     % Listener:
     % Listen for connections using plain TCP
     {ok, _} = cowboy:start_clear(http,
-                                 [{port, 8080}],
+                                 [{port, ?PORT_BACKEND}],
                                  #{env => #{dispatch => Dispatch},
                                    middlewares =>
                                        [cowboy_router,
                                         ca_cowboy_middleware,
                                         cowboy_handler]}),
 
-    io:fwrite("[app] Cowboy is listening for connections using TCP...~n", []),
+    io:fwrite("[app] Cowboy is listening on port ~p for connections using TCP...~n", [?PORT_BACKEND]),
 
     ttt_sup:start_link().
-    
-    % TESTING
-    % test_scenario_1().
 
 stop(_State) -> 
     io:fwrite("[app] App stopped. Cleaning anything remaining...~n", []),
     ok = cowboy:stop_listener(http).
 
 %% internal functions
-test_scenario_1() ->
-    Stalemate_status = gameserver_process:stalemate(),
-    io:fwrite("[app] the stalemate status is: ~p.~n", [Stalemate_status]).
