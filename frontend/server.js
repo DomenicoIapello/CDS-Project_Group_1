@@ -4,7 +4,7 @@ const axios = require('axios');
 
 // Variables
 const port = 3000;
-var backendURL = 'http://localhost:8080/playerone/'  // + 'P1Move=X________' ; // 'localhost:8080/health';
+var backendURL = 'http://localhost:8080/gameserver/';
 var currentGrid = null;
 
 // Functions
@@ -30,7 +30,7 @@ function backendGetJSON(backendURL){
 }
 
 function backendPostJson(backendURL) {
-    let payload = {"P1Move": 'X___X___X'};
+    let payload = {"current_grid": [0,0,0,1,1,1,2,2,2]};
 
     let res = axios.post(backendURL, payload);
 
