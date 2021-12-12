@@ -17,7 +17,7 @@
 -behaviour(gen_server). % https://www.erlang.org/doc/man/gen_server.html
 
 % API
--export([start/0]).
+-export([start/4]).
 -export([analyze_post_request/1, get_intial_grid/0]).
 % Game Logic
 -export([send/1, distribute/1, bmulticast/1, sendToFrontEnd/1, datareceive/0]).
@@ -115,9 +115,10 @@ datareceive() ->
 %% @spec start() -> {ok,Pid} | ignore | {error,Error}
 %% @end
 %% -------------------------------------------------------------------------
-start() ->
+start(Name, Limit, Sup_PID, MFA) ->
     % this function spawns and links to a new process, a gen_server.
     io:fwrite("[gameserver_process.erl] Spawning Game Server...(pid: ~p).~n", [self()]),
+    io:fwrite("[gameserver_process.erl] (with Name=~p, Limit=~p, SupID=~p, MFA=~p).~n", [Name, Limit, Sup_PID, MFA]),
     gen_server:start_link({local, ?MODULE},
                           ?MODULE,
                           [],
@@ -156,7 +157,8 @@ handle_call({DecodedData}, _From, _Grid) ->
     NewGrid = DecodedData,  % assume/set the received grid (DecodedData) as the new state of the server (_Grid)
 
     % multicast to player processes (to check if anyone has won)
-    PlayerOne_status = distribute(DecodedData), % call something, and return 0 (not win) or 1 (win)
+    % PlayerOne_status = distribute(DecodedData), % call something, and return 0 (not win) or 1 (win)
+    {PlayerOne_status, _} = playerone_process:analyze_grid(DecodedData), % call something, and return 0 (not win) or 1 (win)
     PlayerTwo_status = distribute(DecodedData), % call something, and return 0 (not win) or 1 (win)
     % check if grid has any empty cells or not (stalemate)
     Stalemate_status = check_stalemate(DecodedData),

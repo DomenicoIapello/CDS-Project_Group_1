@@ -36,7 +36,7 @@ post(PlayerTwo, Move) ->
 init([]) ->
     % init() is called when a connection is made to the server
     io:fwrite("[playertwo_process.erl] Grid initialized.~n", []),
-    Grid = "_________",
+    Grid = [0,0,0,0,0,0,0,0,0],
     {ok, Grid}.
 
 handle_call({post, PlayerTwo, Move}, {Pid, Tag}, Grid) ->

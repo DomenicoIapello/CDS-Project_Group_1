@@ -48,7 +48,7 @@ start(_StartType, _StartArgs) ->
 
     io:fwrite("[app] Cowboy is listening on port ~p for connections using TCP...~n", [?PORT_BACKEND]),
 
-    ttt_sup:start_link().
+    ttt_sup:start_link("ttt_sup", 1, {}).
 
 stop(_State) -> 
     io:fwrite("[app] App stopped. Cleaning anything remaining...~n", []),
