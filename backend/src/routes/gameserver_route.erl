@@ -122,7 +122,8 @@ response_to_get(Req0, State0) ->
 %% @spec 
 %% @end
 %% -------------------------------------------------------------------------
-response_to_post(Req0, _State0) ->
+response_to_post(Req0, State) ->
+    io:fwrite("[gameserver_route.erl] reponse_to_post with State~p.~n", [State]),
     % Read and decode JSON data into Erlang data
     {ok, EncodedData, _} = cowboy_req:read_body(Req0),
     DecodedData = jiffy:decode(EncodedData),  % DecodedData = {[{<<.>>, <<.>>}]} = a tuple {} containing a list [] containg a tuple {} with two bit strings <<>>.
@@ -145,10 +146,12 @@ response_to_post(Req0, _State0) ->
     EncodedReply = jiffy:encode({[Reply]}),
     io:fwrite("-------- JSON Encoded Reply: ~p.~n", [EncodedReply]),
     % Send response back to frontend to answer its initial POST request.
-    cowboy_req:reply(Code,
-                     #{<<"content-type">> => <<"application/json">>},
+    Req1 = cowboy_req:reply(Code,
+                     #{<<"Content-Type">> => <<"application/json">>},   % cowboy_req:headers(3)
                      EncodedReply,
-                     Req0).
+                     Req0),
+                    
+    {ok, Req1, State}.
 
 
 %%% ==========================================================================

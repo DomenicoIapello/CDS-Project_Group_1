@@ -24,7 +24,22 @@
 
 -define(PORT_BACKEND, 8080).
 
-start(_StartType, _StartArgs) ->
+
+%%% ==========================================================================
+%%% CALLBACKS
+%%% ==========================================================================
+
+%% -------------------------------------------------------------------------
+%% @doc
+%% 
+%%
+%%
+%% @spec: start(_StartType, _StartArgs) -> {ok, Pid} or {ok, Pid, SomeState}
+%%     _StartType: normal, or other possibilites to make the application distributed.
+%%     _StartArgs: what comes from our application file (../ebin/ttt.app).
+%% @end
+%% -------------------------------------------------------------------------
+start(normal, []) ->
     io:fwrite("Tic-Tac-Toe starting... (ttt_app pid: ~p)~n", [self()]),
     % Compile routes to the resources:
     % takes a human readable list of routes and transforms it into a form more efficient to process.
@@ -48,10 +63,43 @@ start(_StartType, _StartArgs) ->
 
     io:fwrite("[app] Cowboy is listening on port ~p for connections using TCP...~n", [?PORT_BACKEND]),
 
+    ttt_sup:start_link("ttt_sup", 1, {});
+
+start({takeover, _OtherNode}, []) ->
+    % these {takeover, OtherNode} argument is passed to start/2 when a 
+    % more important node takes over a backup node.
+    io:fwrite("[app] takeover ...~n", []),
+    Dispatch = cowboy_router:compile([{'_',
+                                       [{"/health", health_route, []},
+                                       {"/playerone", playerone_route, []},
+                                       {"/playertwo", playerone_route, []},
+                                       {"/gameserver", gameserver_route, []}]}]),
+
+    {ok, _} = cowboy:start_clear(http,
+                                 [{port, ?PORT_BACKEND}],
+                                 #{env => #{dispatch => Dispatch},
+                                   middlewares =>
+                                       [cowboy_router,
+                                        ca_cowboy_middleware,
+                                        cowboy_handler]}),
+
     ttt_sup:start_link("ttt_sup", 1, {}).
 
+
+%% -------------------------------------------------------------------------
+%% @doc
+%% 
+%% 
+%%
+%% @spec stop(_State) -> ok | {error, Reason}
+%%     _State: is the state returned by start/2.
+%% @end
+%% -------------------------------------------------------------------------
 stop(_State) -> 
     io:fwrite("[app] App stopped. Cleaning anything remaining...~n", []),
     ok = cowboy:stop_listener(http).
 
-%% internal functions
+%%% ==========================================================================
+%%% INTERFACE
+%%% ==========================================================================
+%% @TODO: do we need anything here?

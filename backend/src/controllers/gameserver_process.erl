@@ -44,7 +44,7 @@
 %% -------------------------------------------------------------------------
 analyze_post_request(DecodedData) ->
     io:fwrite("[gameserver_process.erl] Start analyzing DecodedData from POST request...~n", []),
-    gen_server:call(?MODULE, {DecodedData}).
+    gen_server:call({global, ?MODULE}, {DecodedData}).
 
 %% -------------------------------------------------------------------------
 %% @doc
@@ -54,7 +54,7 @@ analyze_post_request(DecodedData) ->
 %% @end
 %% -------------------------------------------------------------------------
 get_intial_grid() ->
-    gen_server:call(?MODULE, {}).
+    gen_server:call({global, ?MODULE}, {}).
 
 %%% ==========================================================================
 %%% Game Logic for the Game Server
@@ -119,7 +119,7 @@ start(Name, Limit, Sup_PID, MFA) ->
     % this function spawns and links to a new process, a gen_server.
     io:fwrite("[gameserver_process.erl] Spawning Game Server...(pid: ~p).~n", [self()]),
     io:fwrite("[gameserver_process.erl] (with Name=~p, Limit=~p, SupID=~p, MFA=~p).~n", [Name, Limit, Sup_PID, MFA]),
-    gen_server:start_link({local, ?MODULE},
+    gen_server:start_link({global, ?MODULE},
                           ?MODULE,
                           [],
                           []).
