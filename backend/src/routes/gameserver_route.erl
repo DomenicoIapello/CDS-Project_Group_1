@@ -26,7 +26,7 @@
 %% @end
 %% -------------------------------------------------------------------------
 init(Req0, State) -> 
-    io:fwrite("[gameserver_route.erl]:init() switches to REST handler behavior...~n", []),
+    io:fwrite("[gameserver_route.erl (pid~p)]:init() switches to REST handler behavior...(State=~p) (Req=~p)~n", [self(), State, Req0]),
     {cowboy_rest, Req0, State}.  
 
 %% -------------------------------------------------------------------------
@@ -98,9 +98,9 @@ content_types_accepted(Req, State) ->
 %% @spec 
 %% @end
 %% -------------------------------------------------------------------------
-response_to_get(Req0, State0) ->
+response_to_get(Req, State) ->
     io:fwrite("[gameserver_route.erl]:response_to_get()....~n", []),
-    QsVals = cowboy_req:parse_qs(Req0),
+    QsVals = cowboy_req:parse_qs(Req),
     io:fwrite("[gameserver_route.erl]:response_to_get(): parsed query=~p.~n", [QsVals]),
 
     {_, Current_Grid} = gameserver_process:get_intial_grid(),
@@ -108,7 +108,7 @@ response_to_get(Req0, State0) ->
     io:fwrite("[gameserver_route.erl] Reply to encode is: ~p.~n", [Reply]),
     EncodedReply = jiffy:encode({[Reply]}),
     io:fwrite("[gameserver_route.erl] QsVals is: ~p.~n", [EncodedReply]),
-    {EncodedReply, Req0, State0}.
+    {EncodedReply, Req, State}.
 
 %% -------------------------------------------------------------------------
 %% @doc

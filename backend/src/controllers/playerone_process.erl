@@ -10,7 +10,7 @@
 
 -export([start/0, get/1, analyze_grid/1]).
 -export([init/1, handle_cast/2, handle_call/3, terminate/2]).
--export([dummy_answer/1, ttt/1]).
+-export([ttt/1]).
 
 
 %% -------------------------------------------------------------------------
@@ -41,7 +41,7 @@ start() ->
 %% -------------------------------------------------------------------------
 analyze_grid(DecodedData) ->
     % post: player one can make a move?
-    io:fwrite("[playerone_process.erl] game server sent current grid ~p.~n", [DecodedData]),
+    io:fwrite("[playerone_process.erl (pid=~p)] game server sent current grid ~p.~n", [self(), DecodedData]),
     gen_server:call(?MODULE, {post, DecodedData}).
 
 %% -------------------------------------------------------------------------
@@ -62,10 +62,6 @@ get(PlayerOne) ->
 %%% these logic are used by the handlers.
 %%% NO LOGIC should be directly implemented into the handlers.
 %%% ==========================================================================
-
-dummy_answer(DecodedData) ->
-    io:fwrite("[playerone_process.erl] received data: ~p.~n", [DecodedData]),
-    0.
 
 % idea to start/spawn ttt:
 % start() ->
@@ -111,7 +107,7 @@ ttt(DecodedData) ->
 %%% ==========================================================================
 init([]) ->
     % init() is called when a connection is made to the server
-    io:fwrite("[playerone_process.erl] Grid initialized.~n", []),
+    io:fwrite("[playerone_process.erl (pid=~p)] Grid initialized.~n", [self()]),
     Grid = [0,0,0,0,0,0,0,0,0],
     {ok, Grid}.
 
@@ -126,7 +122,7 @@ init([]) ->
 handle_call({post, DecodedData}, {Pid, Tag}, Grid) ->
     % handle_call is invoked in response to gen_server:call
     io:fwrite("[playerone_process.erl] handle call: internal state of the gen_server process (current ttt grid): ~p.~n", [Grid]),
-    io:fwrite("[playerone_process.erl] handle call: from pid=~p, tag=~p.~n", [Pid, Tag]),
+    io:fwrite("[playerone_process.erl (pid=~p)] handle call: from pid=~p, tag=~p.~n", [self(), Pid, Tag]),
     NewGrid = DecodedData,
     Response = ttt(DecodedData),
     {reply, {Response, 201}, NewGrid};  % Response is the data that can be used/read. NewGrid is the NewState: https://www.erlang.org/doc/man/gen_server.html#Module:handle_call-3

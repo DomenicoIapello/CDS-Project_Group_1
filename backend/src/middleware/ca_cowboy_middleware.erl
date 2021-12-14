@@ -14,10 +14,28 @@
 
 -export([execute/2]).
 
+% execute(Req, Env) ->
+%     io:fwrite("[middleware]:execute()...~n", []),
+%     {ok, ReqWithCorsHeaders} = set_cors_headers(Req),
+%     {ok, ReqWithCorsHeaders, Env}.
+
 execute(Req, Env) ->
-    io:fwrite("[middleware]:execute()...~n", []),
     {ok, ReqWithCorsHeaders} = set_cors_headers(Req),
-    {ok, ReqWithCorsHeaders, Env}.
+    Method = cowboy_req:method(ReqWithCorsHeaders),
+
+    io:fwrite("[middleware (pid~p)]:execute()...with method~p.~n", [self(), Method]),
+
+    case Method of
+        <<"OPTIONS">> ->
+            {ok, ReqFinal} = cowboy_req:reply(200, ReqWithCorsHeaders),
+            {halt, ReqFinal, Env};
+        _ ->
+            %% continue as normal
+            io:fwrite("[middleware (pid~p)]:execute()...matched as normal, with Env~p.~n", [self(), Env]),
+            {ok, ReqWithCorsHeaders, Env}
+    end.
+
+
 
 %% ===================================================================
 %% Helpers

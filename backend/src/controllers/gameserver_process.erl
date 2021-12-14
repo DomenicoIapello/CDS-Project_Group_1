@@ -43,7 +43,7 @@
 %% @end
 %% -------------------------------------------------------------------------
 analyze_post_request(DecodedData) ->
-    io:fwrite("[gameserver_process.erl] Start analyzing DecodedData from POST request...~n", []),
+    io:fwrite("[gameserver_process.erl (pid=~p)] Start analyzing DecodedData from POST request...~n", [self()]),
     gen_server:call({global, ?MODULE}, {DecodedData}).
 
 %% -------------------------------------------------------------------------
@@ -117,12 +117,12 @@ datareceive() ->
 %% -------------------------------------------------------------------------
 start(Name, Limit, Sup_PID, MFA) ->
     % this function spawns and links to a new process, a gen_server.
-    io:fwrite("[gameserver_process.erl] Spawning Game Server...(pid: ~p).~n", [self()]),
+    io:fwrite("[gameserver_process.erl (pid=~p)] Spawning Game Server....~n", [self()]),
     io:fwrite("[gameserver_process.erl] (with Name=~p, Limit=~p, SupID=~p, MFA=~p).~n", [Name, Limit, Sup_PID, MFA]),
-    gen_server:start_link({global, ?MODULE},
-                          ?MODULE,
-                          [],
-                          []).
+    gen_server:start_link({global, ?MODULE},  % ServerName
+                          ?MODULE,            % Module
+                          [],                 % Args
+                          []).                % Options
 
 
 %%% ==========================================================================
@@ -140,7 +140,7 @@ start(Name, Limit, Sup_PID, MFA) ->
 %% @end
 %% -------------------------------------------------------------------------
 init([]) ->
-    io:fwrite("[gameserver_process.erl] Grid initialized.~n", []),
+    io:fwrite("[gameserver_process.erl (pid=~p)] Grid initialized.~n", [self()]),
     Grid = [0,0,0,0,0,0,0,0,0],
     {ok, Grid}.
 
@@ -151,15 +151,15 @@ init([]) ->
 %% @spec
 %% @end
 %% -------------------------------------------------------------------------
-handle_call({DecodedData}, _From, _Grid) ->
+handle_call({DecodedData}, _From, Grid) ->
     % _Grid represent the current grid that the server knows (internal state)
-    io:fwrite("[gameserver_process.erl]:handle_call multicasts and check for stalemate...~n", []),
+    io:fwrite("[gameserver_process.erl (pid=~p)]:handle_call multicasts and check for stalemate...(State=~p)~n", [self(), Grid]),
     NewGrid = DecodedData,  % assume/set the received grid (DecodedData) as the new state of the server (_Grid)
 
     % multicast to player processes (to check if anyone has won)
     % PlayerOne_status = distribute(DecodedData), % call something, and return 0 (not win) or 1 (win)
     {PlayerOne_status, _} = playerone_process:analyze_grid(DecodedData), % call something, and return 0 (not win) or 1 (win)
-    PlayerTwo_status = distribute(DecodedData), % call something, and return 0 (not win) or 1 (win)
+    {PlayerTwo_status, _} = playertwo_process:analyze_grid(DecodedData), % call something, and return 0 (not win) or 1 (win)
     % check if grid has any empty cells or not (stalemate)
     Stalemate_status = check_stalemate(DecodedData),
 
@@ -195,5 +195,5 @@ handle_cast(_Message, Grid) ->
 %% @end
 %% -------------------------------------------------------------------------
 terminate(_Reason, _Grid) ->
-    io:fwrite("[gameserver_process.erl] terminate.~n", []),
+    io:fwrite("[gameserver_process.erl (pid=~p)] terminate.~n", [self()]),
     ok.
