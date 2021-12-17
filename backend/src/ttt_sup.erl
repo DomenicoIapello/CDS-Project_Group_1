@@ -76,7 +76,7 @@ init([Name, Limit, MFA]) ->
             playertwo_process, {playertwo_process, start, []}, permanent, 1, worker, [playertwo_process]
         }
     ],
-
+    
     % Top Supervisor's strategy and actual spawning.
     {
         ok, 

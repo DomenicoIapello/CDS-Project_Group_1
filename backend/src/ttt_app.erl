@@ -21,6 +21,9 @@
 -behaviour(application).
 
 -export([start/2, stop/1]).
+-export([init_gameserver/0, init_playerone/0, init_playertwo/0]).
+
+-export([hi/0]).
 
 -define(PORT_BACKEND, 8080).
 
@@ -39,7 +42,7 @@
 %%     _StartArgs: what comes from our application file (../ebin/ttt.app).
 %% @end
 %% -------------------------------------------------------------------------
-start(normal, []) ->
+start(_StartType, _StartArgs) ->
     io:fwrite("Tic-Tac-Toe starting... (ttt_app pid: ~p)~n", [self()]),
     % Compile routes to the resources:
     % takes a human readable list of routes and transforms it into a form more efficient to process.
@@ -60,7 +63,6 @@ start(normal, []) ->
                                        [cowboy_router,
                                         ca_cowboy_middleware,
                                         cowboy_handler]}),
-
     io:fwrite("[app] Cowboy is listening on port ~p for connections using TCP...~n", [?PORT_BACKEND]),
 
     ttt_sup:start_link("ttt_sup", 1, {});
@@ -103,3 +105,14 @@ stop(_State) ->
 %%% INTERFACE
 %%% ==========================================================================
 %% @TODO: do we need anything here?
+init_gameserver() ->
+    gameserver_process:start().
+init_playerone() ->
+    playerone_process:init().
+init_playertwo() ->
+    playertwo_process:init().
+
+
+hi() ->
+    io:fwrite("You are a best of nature!~n", []),
+    ok.

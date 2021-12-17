@@ -138,7 +138,7 @@ response_to_post(Req0, State) ->
             % a good format response to analyze
             {R, Code} = gameserver_process:analyze_post_request(Decoded_current_grid_as_integers),
             io:fwrite("[gameserver_route.erl] gameserver_process analyzed the DecodedData, its answer is: ~p with code ~p.~n", [R, Code]),
-            Reply = {response, R}
+            Reply = {resp, R}
     end,
 
     % Format back into JSON for the frontend

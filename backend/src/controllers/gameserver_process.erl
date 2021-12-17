@@ -117,7 +117,7 @@ datareceive() ->
 %% -------------------------------------------------------------------------
 start(Name, Limit, Sup_PID, MFA) ->
     % this function spawns and links to a new process, a gen_server.
-    io:fwrite("[gameserver_process.erl (pid=~p)] Spawning Game Server....~n", [self()]),
+    io:fwrite("[gameserver_process.erl (pid=~p)] Spawning Game Server...~n", [self()]),
     io:fwrite("[gameserver_process.erl] (with Name=~p, Limit=~p, SupID=~p, MFA=~p).~n", [Name, Limit, Sup_PID, MFA]),
     gen_server:start_link({global, ?MODULE},  % ServerName
                           ?MODULE,            % Module
