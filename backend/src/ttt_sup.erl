@@ -82,7 +82,7 @@ init([Name, Limit, MFA]) ->
         ok, 
         {
             {
-                one_for_one,  % ttt_sup restarts only the process that crash (one by one).
+                one_for_all,  % ttt_sup restarts all processes; not only the process that crash (one_for_one: one by one).
                 10,           % MaxRestart: 10 failure allowed
                 10            % MaxTime: every 10 seconds
             }, 

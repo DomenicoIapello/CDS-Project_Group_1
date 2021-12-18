@@ -21,8 +21,8 @@
 -behaviour(application).
 
 -export([start/2, stop/1]).
-% -export([init_gameserver/0, init_playerone/0, init_playertwo/0]).
-% -export([hi/0]).
+-export([init_gameserver/0]). %, init_playerone/0, init_playertwo/0]).
+-export([hi/1]).
 
 -define(PORT_BACKEND, 8080).
 
@@ -41,7 +41,7 @@
 %%     _StartArgs: what comes from our application file (../ebin/ttt.app).
 %% @end
 %% -------------------------------------------------------------------------
-start(_StartType, _StartArgs) ->
+start(normal, []) ->
     io:fwrite("Tic-Tac-Toe starting... (ttt_app pid: ~p)~n", [self()]),
     % Compile routes to the resources:
     % takes a human readable list of routes and transforms it into a form more efficient to process.
@@ -64,27 +64,32 @@ start(_StartType, _StartArgs) ->
                                         cowboy_handler]}),
     io:fwrite("[app] Cowboy is listening on port ~p for connections using TCP...~n", [?PORT_BACKEND]),
 
+    {ok, PidGameServer} = gameserver_process:start(name, limit, self(), mfa),
+    register(gameserver, PidGameServer),
+    % init_gameserver(),
+    hi("App is doing crazy stuffs, and is about to start a tree!"),
+
+    ttt_sup:start_link("ttt_sup", 1, {});
+
+start({takeover, _OtherNode}, []) ->
+    % these {takeover, OtherNode} argument is passed to start/2 when a 
+    % more important node takes over a backup node.
+    io:fwrite("[app] takeover ...~n", []),
+    Dispatch = cowboy_router:compile([{'_',
+                                       [{"/health", health_route, []},
+                                       {"/playerone", playerone_route, []},
+                                       {"/playertwo", playerone_route, []},
+                                       {"/gameserver", gameserver_route, []}]}]),
+
+    {ok, _} = cowboy:start_clear(http,
+                                 [{port, ?PORT_BACKEND}],
+                                 #{env => #{dispatch => Dispatch},
+                                   middlewares =>
+                                       [cowboy_router,
+                                        ca_cowboy_middleware,
+                                        cowboy_handler]}),
+
     ttt_sup:start_link("ttt_sup", 1, {}).
-
-% start({takeover, _OtherNode}, []) ->
-%     % these {takeover, OtherNode} argument is passed to start/2 when a 
-%     % more important node takes over a backup node.
-%     io:fwrite("[app] takeover ...~n", []),
-%     Dispatch = cowboy_router:compile([{'_',
-%                                        [{"/health", health_route, []},
-%                                        {"/playerone", playerone_route, []},
-%                                        {"/playertwo", playerone_route, []},
-%                                        {"/gameserver", gameserver_route, []}]}]),
-
-%     {ok, _} = cowboy:start_clear(http,
-%                                  [{port, ?PORT_BACKEND}],
-%                                  #{env => #{dispatch => Dispatch},
-%                                    middlewares =>
-%                                        [cowboy_router,
-%                                         ca_cowboy_middleware,
-%                                         cowboy_handler]}),
-
-%     ttt_sup:start_link("ttt_sup", 1, {}).
 
 
 %% -------------------------------------------------------------------------
@@ -104,14 +109,13 @@ stop(_State) ->
 %%% INTERFACE
 %%% ==========================================================================
 %% @TODO: do we need anything here?
-% init_gameserver() ->
-%     gameserver_process:start().
+init_gameserver() ->
+    gameserver_process:init_gameserver().
 % init_playerone() ->
 %     playerone_process:init().
 % init_playertwo() ->
 %     playertwo_process:init().
 
 
-% hi() ->
-%     io:fwrite("You are a best of nature!~n", []),
-%     ok.
+hi(MyMsg) ->
+    gameserver_process:hi(MyMsg).

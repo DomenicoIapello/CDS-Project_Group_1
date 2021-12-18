@@ -18,10 +18,9 @@
 
 % API
 -export([start/4]).
--export([analyze_post_request/1, get_intial_grid/0]).
+-export([init_gameserver/0, analyze_post_request/1, get_intial_grid/0]).
 % Game Logic
--export([send/1, distribute/1, bmulticast/1, sendToFrontEnd/1, datareceive/0]).
--export([check_stalemate/1]).
+-export([check_stalemate/1, hi/1]).
 % gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, terminate/2]).
 
@@ -29,6 +28,29 @@
 %%% ==========================================================================
 %%% API
 %%% ==========================================================================
+
+
+%% -------------------------------------------------------------------------
+%% @doc
+%% This lets a user starts a gameserver process
+%% It is a "wrapper" so that a user in her own terminal can start the logic for her
+%%
+%% @spec
+%% @end
+%% -------------------------------------------------------------------------
+init_gameserver() ->
+    gen_server:call({global, ?MODULE}, {userInteract, initProcess}).
+
+
+%% -------------------------------------------------------------------------
+%% @doc
+%% this is just a dummy test to access method from the ttt_app.erl
+%% @spec
+%% @end
+%% -------------------------------------------------------------------------
+hi(MyMsg) ->
+    gen_server:call({global, ?MODULE}, {msg, MyMsg}).
+
 
 %% -------------------------------------------------------------------------
 %% @doc
@@ -66,45 +88,6 @@ check_stalemate(Current_Grid) ->
     case lists:member(0, Current_Grid) of
         true -> 1;  % empty cells available
         false -> 0  % stalemate
-    end.
-
-send(data) ->
-    genserver:post(data).
-
-distribute(Current_Grid) ->
-    Player_answer = bmulticast(Current_Grid),
-    % io:format("simulate distribute stuff: ~p.~n", [Player_answer]),
-    Player_answer.
-
-bmulticast(_Current_Grid) ->
-    % io:format("simulate bmulticast stuff...~p.~n", [Current_Grid]),
-    Player_answer = 0,
-    Player_answer.
-
-sendToFrontEnd(_SendData) ->
-    io:format("We want to send to frondend: ").
-
-datareceive() ->
-    receive
-        {"Player 1 has won"} ->
-            SendData = ("Winner: Player 1"),
-            sendToFrontEnd(SendData),
-            datareceive();
-
-        {"No for Player 1"} ->
-            SendData = ("Next step for Player 2"),
-            sendToFrontEnd(SendData),
-            datareceive();
-
-        {"Player 2 has won"} ->
-            SendData = ("Winner: Player 2"),
-            sendToFrontEnd(SendData),
-            datareceive();
-
-        {"No for Player 2"} ->
-            SendData = ("Next step for Player 1"),
-            sendToFrontEnd(SendData),
-            datareceive()
     end.
 
 
@@ -156,10 +139,9 @@ handle_call({DecodedData}, _From, Grid) ->
     io:fwrite("[gameserver_process.erl (pid=~p)]:handle_call multicasts and check for stalemate...(State=~p)~n", [self(), Grid]),
     NewGrid = DecodedData,  % assume/set the received grid (DecodedData) as the new state of the server (_Grid)
 
-    % multicast to player processes (to check if anyone has won)
-    % PlayerOne_status = distribute(DecodedData), % call something, and return 0 (not win) or 1 (win)
-    {PlayerOne_status, _} = playerone_process:analyze_grid(DecodedData), % call something, and return 0 (not win) or 1 (win)
-    {PlayerTwo_status, _} = playertwo_process:analyze_grid(DecodedData), % call something, and return 0 (not win) or 1 (win)
+    % multicast (sequentially) to player processes (to check if anyone has won)
+    {PlayerOne_status, _} = playerone_process:analyze_grid(DecodedData), 
+    {PlayerTwo_status, _} = playertwo_process:analyze_grid(DecodedData),
     % check if grid has any empty cells or not (stalemate)
     Stalemate_status = check_stalemate(DecodedData),
 
@@ -170,6 +152,14 @@ handle_call({DecodedData}, _From, Grid) ->
     Response = [PlayerOne_status, PlayerTwo_status, Stalemate_status],
     io:fwrite("[gameserver_process.erl]:response = ~p. (With 1 or 0, true/false, for {player one wins, player two wins, empty cells available}).~n", [Response]),
     {reply, {Response, 201}, NewGrid};  
+
+handle_call({userInteract, initProcess}, _From, Grid) ->
+    init([]),
+    {reply, gridInitiated, Grid};
+
+handle_call({msg, MyMsg}, _From, Grid) ->
+    io:fwrite("[gameserver_process] handle_call says ~p.~n", [MyMsg]),
+    {reply, response, Grid};
 
 handle_call({}, _From, Grid) ->
     Response = {current_grid, Grid},
