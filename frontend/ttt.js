@@ -1,10 +1,12 @@
 document.addEventListener('DOMContentLoaded', function(){
     document.querySelector('#board').addEventListener('click', markCell);
+    
     var current = 0; //marks the current player 0=player1, 1=player2
     var players = ['1', '2']; //array of players
     var cells = 0; //variable to check if another cell is empty
     const data = [0,0,0,0,0,0,0,0,0]; //data of cells 0=not chosen, 1=chosen by player1, 2=chosen by player2
-    
+    var datainjson = "{uba}";
+    var display = "";
 
     function markCell(c) {
         var cell = c.target; //get the clicked cell
@@ -26,34 +28,46 @@ document.addEventListener('DOMContentLoaded', function(){
     
         current = 1 - current; //set the current player to the other player for the next round
 
-        document.querySelector('#Player').innerText = 'It\'s the turn of Player ' + players[current]; //display whos turn it is
+        document.querySelector('#Player').innerText = 'Its the turn of Player ' + players[current]; //display whos turn it is
 
         cells = cells + 1; //rise the number of cells clicked
-
-        document.querySelector('#demo').innerText = data; //show what the current data of the cells is
                
         //check if another cell is empty, if not the text is displayed
-        if(cells == 9) {
+        
+        let textdata = data.toString();
+        datainjson = JSON.stringify(textdata);
+
+
+
+        //new code from here
+        var dataPost = new XMLHttpRequest();
+        var url = "http://ptsv2.com/t/vh7me-1638884442/post";
+        dataPost.open("POST", url, false);
+        dataPost.send(datainjson);
+                var result = dataPost.responseText;
+                if(result == "1,0"){
+                    display = "Player 1 has won";
+                } else if (result == "0,1"){
+                    display = "Player 2 has won";
+                } else if(result == "0,0" && cells == 9){
+                    display = "No player has won and no more empty cells are available. It's a tie"
+                } else {
+                    display = 'Its the turn of Player ' + players[current];
+                }
+
+            document.querySelector('#Player').innerText = display;
+
+        //to here
+        document.querySelector('#backenddatasend').innerText = datainjson;
+        document.querySelector('#backenddatareceive').innerText = result;
+        
+        /*if(cells == 9) {
             document.querySelector('#Player').innerText = 'No Player has won, no more empty cells';
-        }
+        }*/
 
-        if(data[0] == 1 && data[4] == 1 && data[8] == 1){
-            document.querySelector('#Player').innerText = p1win();
-        }
+    }
+    /*create a new HTTP request which can be fetched by the cowboy REST service
+    (source:https://stackoverflow.com/questions/36975619/how-to-call-a-rest-web-service-api-from-javascript)*/
 
-        //put the data array in a JSON format
-        var datainjson = JSON.stringify(data);
-        // HTTP POST to backend
-        document.querySelector('#backenddata').innerText = '(We should be) sending to backend: ' + datainjson;
-        return datainjson;
-    }
-    
-    function p1win(){
-        return 'You\'re the champion! Congratulations!';
-    }
-
-    function test(){
-        const axios = require('axios');
-        return "salut";
-    }
-})
+}
+)
