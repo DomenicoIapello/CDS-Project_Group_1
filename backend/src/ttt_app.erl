@@ -7,8 +7,6 @@
 %% When the application starts, the start() function is called and it itselfs starts
 %% the top supervisor which will create the supervision tree.
 %%
-%% TODO   --------- DETAIL MORE WHAT IS ACTUALLY STARTING ---------
-%%
 %%
 %% The application will actually stop in an automatic fashion. Any necessary cleaning is
 %% taking care by the stop() function which is called after the application has been stopped.
@@ -21,8 +19,6 @@
 -behaviour(application).
 
 -export([start/2, stop/1]).
-% -export([start_gameserver/0]). %, init_playerone/0, init_playertwo/0]).
-% -export([hi/1]).
 
 -define(PORT_BACKEND, 8080).
 
@@ -47,8 +43,6 @@ start(normal, []) ->
     % takes a human readable list of routes and transforms it into a form more efficient to process.
     Dispatch = cowboy_router:compile([{'_',
                                        [{"/health", health_route, []},
-                                       {"/playerone", playerone_route, []},
-                                       {"/playertwo", playerone_route, []},
                                        {"/gameserver", gameserver_route, []}]}]),
     
     io:fwrite("\n[app] Cowboy compiled routes to the resources.~n", []),
@@ -77,8 +71,6 @@ start({takeover, _OtherNode}, []) ->
     io:fwrite("[app] takeover ...~n", []),
     Dispatch = cowboy_router:compile([{'_',
                                        [{"/health", health_route, []},
-                                       {"/playerone", playerone_route, []},
-                                       {"/playertwo", playerone_route, []},
                                        {"/gameserver", gameserver_route, []}]}]),
 
     {ok, _} = cowboy:start_clear(http,
@@ -108,16 +100,3 @@ stop(_State) ->
 %%% ==========================================================================
 %%% INTERFACE
 %%% ==========================================================================
-%% @TODO: do we need anything here?
-
-% REMARK: we want to spawn/start the process! not init() initialise its state (the grid).
-% start_gameserver() ->
-%     gameserver_process:start_gameserver().
-% start_playerone() ->
-%     playerone_process:start_playerone().
-% start_playertwo() ->
-%     playertwo_process:start_playertwo().
-
-
-% hi(MyMsg) ->
-%     gameserver_process:hi(MyMsg).

@@ -51,10 +51,6 @@ start_link(Name, Limit, MFA) ->
 %% -------------------------------------------------------------------------
 init([Name, Limit, MFA]) ->
     io:fwrite("[sup] creating the supervision tree...~n", []),
-
-    RestartStrategy = one_for_all,
-    MaxRestarts = 10,                    % MaxRestart: 10 failure allowed
-    MaxSecondsBetweenRestarts = 10,
     
     % List of processes that our Top Supervisor will spawn and manage.
     Procs = [

@@ -14,11 +14,6 @@
 
 -export([execute/2]).
 
-% execute(Req, Env) ->
-%     io:fwrite("[middleware]:execute()...~n", []),
-%     {ok, ReqWithCorsHeaders} = set_cors_headers(Req),
-%     {ok, ReqWithCorsHeaders, Env}.
-
 execute(Req, Env) ->
     {ok, ReqWithCorsHeaders} = set_cors_headers(Req),
     Method = cowboy_req:method(ReqWithCorsHeaders),

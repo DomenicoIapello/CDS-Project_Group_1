@@ -20,7 +20,7 @@
 -export([start/4]).
 -export([init_gameserver/0, analyze_post_request/1, get_intial_grid/0]).
 % Game Logic
--export([check_stalemate/1, hi/1]).
+-export([check_stalemate/1]).
 % gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, terminate/2]).
 
@@ -28,7 +28,6 @@
 %%% ==========================================================================
 %%% API
 %%% ==========================================================================
-
 
 %% -------------------------------------------------------------------------
 %% @doc
@@ -40,17 +39,6 @@
 %% -------------------------------------------------------------------------
 init_gameserver() ->
     gen_server:call({global, ?MODULE}, {userInteract, initProcess}).
-
-
-%% -------------------------------------------------------------------------
-%% @doc
-%% this is just a dummy test to access method from the ttt_app.erl
-%% @spec
-%% @end
-%% -------------------------------------------------------------------------
-hi(MyMsg) ->
-    gen_server:call({global, ?MODULE}, {msg, MyMsg}).
-
 
 %% -------------------------------------------------------------------------
 %% @doc

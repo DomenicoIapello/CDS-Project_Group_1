@@ -63,11 +63,6 @@ get(PlayerTwo) ->
 %%% NO LOGIC should be directly implemented into the handlers.
 %%% ==========================================================================
 
-% idea to start/spawn ttt:
-% start() ->
-%    register(puno, spawn(?module, ttt(), {})),
-%    supervisor ! {"ready"}.
-
 ttt(DecodedData) ->
     io:fwrite("[playertwo_process (pid=~p)] pattern matching on grid...~n", [self()]),
     case DecodedData of
@@ -158,5 +153,3 @@ handle_cast(_Message, Grid) ->
 terminate(_Reason, _Grid) ->
     io:fwrite("[playertwo_process.erl] terminate.~n", []),
     ok.
-
-
