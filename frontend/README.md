@@ -15,3 +15,7 @@ In the project directory, you can run:
 ### `npm start`
 
 Runs the app in the development mode and launches the electron app in a new window.
+
+If you want to generate a new .exe file run:
+
+### 'npx electron-builder'
