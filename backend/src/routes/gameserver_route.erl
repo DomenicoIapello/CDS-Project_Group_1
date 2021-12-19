@@ -26,7 +26,7 @@
 %% @end
 %% -------------------------------------------------------------------------
 init(Req0, State) -> 
-    io:fwrite("[gameserver_route.erl (pid~p)]:init() switches to REST handler behavior...(State=~p) (Req=~p)~n", [self(), State, Req0]),
+    io:fwrite("[gameserver_route.erl (pid~p)]:init() switches to REST handler behavior...~n", [self()]),
     {cowboy_rest, Req0, State}.  
 
 %% -------------------------------------------------------------------------
@@ -123,7 +123,7 @@ response_to_get(Req, State) ->
 %% @end
 %% -------------------------------------------------------------------------
 response_to_post(Req0, State) ->
-    io:fwrite("[gameserver_route.erl] reponse_to_post with State~p.~n", [State]),
+    io:fwrite("[gameserver_route.erl] reponse_to_post ...~n", []),
     % Read and decode JSON data into Erlang data
     {ok, EncodedData, _} = cowboy_req:read_body(Req0),
     DecodedData = jiffy:decode(EncodedData),  % DecodedData = {[{<<.>>, <<.>>}]} = a tuple {} containing a list [] containg a tuple {} with two bit strings <<>>.
@@ -134,17 +134,17 @@ response_to_post(Req0, State) ->
     % if yes, use Erlang backend logic to analyze it.
     case Decoded_current_grid_as_integers of
         [_,_,_,_,_,_,_,_,_] ->
-            io:fwrite("[gameserver_route.erl] Analyze anything really .............~n", []),
+            io:fwrite("[gameserver_route.erl] Analyze any list of length nine...~n", []),
             % a good format response to analyze
             {R, Code} = gameserver_process:analyze_post_request(Decoded_current_grid_as_integers),
-            io:fwrite("[gameserver_route.erl] gameserver_process analyzed the DecodedData, its answer is: ~p with code ~p.~n", [R, Code]),
+            % io:fwrite("[gameserver_route.erl] gameserver_process analyzed the DecodedData, its answer is: ~p with code ~p.~n", [R, Code]),
             Reply = {resp, R}
     end,
 
     % Format back into JSON for the frontend
-    io:fwrite("-------- Reply to encode: ~p.~n", [Reply]),
+    io:fwrite("[gameserver_route.erl] Reply to encode: ~p.~n", [Reply]),
     EncodedReply = jiffy:encode({[Reply]}),
-    io:fwrite("-------- JSON Encoded Reply: ~p.~n", [EncodedReply]),
+    io:fwrite("[gameserver_route.erl] JSON Encoded Reply: ~p.~n", [EncodedReply]),
     % Send response back to frontend to answer its initial POST request.
     Req1 = cowboy_req:reply(Code,
                      #{<<"Content-Type">> => <<"application/json">>},   % cowboy_req:headers(3)
@@ -161,57 +161,14 @@ response_to_post(Req0, State) ->
 %% -------------------------------------------------------------------------
 %% @doc
 %% 
-%% The goal is the go from {[{<<"current_grid">>, <<"1,0,0,0,0,0,0,0,0">>}]} to [1,0,0,0,0,0,0,0,0]
-%%
-%%
-%% Remark: yes, there are too many prints to the console.
-%%
-%% @spec 
-%% @end
-%% -------------------------------------------------------------------------
-% flatten_decoded_data(DecodedData) ->
-%     % DecodedData = {[{<<.>>, <<.>>}]} = a tuple {} containing a list [] containg a tuple {} with two bit strings <<>>.
-%     io:fwrite("[gameserver_route.erl] response_to_post has decodedata the data received from Frontend as: ~p.~n", [DecodedData]),
-%     DecodedData_elem1 = element(1, DecodedData), % DecodedData_elem1 = [{<<.>>, <<.>>}]
-%     io:fwrite("[gameserver_route.erl] response_to_post has DecodedData_elem1 the data received from Frontend as: ~p.~n", [DecodedData_elem1]),
-%     [DecodedData_elem1_head | _DecodedData_elem1_body] = DecodedData_elem1, % DecodedData_elem1_head = {<<.>>, <<.>>}
-%     io:fwrite("[gameserver_route.erl] response_to_post has DecodedData_elem1_head the data received from Frontend as: ~p.~n", [DecodedData_elem1_head]),
-
-%     Decoded_current_grid = element(2, DecodedData_elem1_head), % Decoded_current_grid = <<.>>
-%     io:fwrite("[gameserver_route.erl] response_to_post has Decoded_current_grid the data received from Frontend as: ~p.~n", [Decoded_current_grid]),
-%     Decoded_current_grid_as_list = binary_to_list(Decoded_current_grid),
-%     io:fwrite("[gameserver_route.erl] Decoded_current_grid_as_list : ~p.~n", [Decoded_current_grid_as_list]),
-%     Decoded_current_grid_as_integers = [ element(1, string:to_integer(Substr)) || Substr <- string:tokens(Decoded_current_grid_as_list, ",")],
-%     io:fwrite("[gameserver_route.erl] Decoded_current_grid_as_integers: ~p.~n", [Decoded_current_grid_as_integers]),
-
-%     Decoded_current_grid_as_integers.
-
-
-
-%% -------------------------------------------------------------------------
-%% @doc
-%% 
 %% The goal is the go from {[{<<"current_grid">>, [1,0,0,2,0,0,0,0,0]}]} to [1,0,0,0,0,0,0,0,0]
-%%
-%%
-%% Remark: yes, there are too many prints to the console.
 %%
 %% @spec 
 %% @end
 %% -------------------------------------------------------------------------
 flatten_decoded_data_v2(DecodedData) ->
     % DecodedData = {[{<<.>>, <<.>>}]} = a tuple {} containing a list [] containg a tuple {} with two bit strings <<>>.
-    io:fwrite("[gameserver_route.erl] response_to_post has decodedata the data received from Frontend as: ~p.~n", [DecodedData]),
     DecodedData_elem1 = element(1, DecodedData), % DecodedData_elem1 = [{<<.>>, <<.>>}]
-    io:fwrite("[gameserver_route.erl] response_to_post has DecodedData_elem1 the data received from Frontend as: ~p.~n", [DecodedData_elem1]),
     [DecodedData_elem1_head | _DecodedData_elem1_body] = DecodedData_elem1, % DecodedData_elem1_head = {<<.>>, <<.>>}
-    io:fwrite("[gameserver_route.erl] response_to_post has DecodedData_elem1_head the data received from Frontend as: ~p.~n", [DecodedData_elem1_head]),
-
     Decoded_current_grid = element(2, DecodedData_elem1_head), % Decoded_current_grid = <<.>>
-    io:fwrite("[gameserver_route.erl] response_to_post has Decoded_current_grid the data received from Frontend as: ~p.~n", [Decoded_current_grid]),
-    % Decoded_current_grid_as_list = binary_to_list(Decoded_current_grid),
-    % io:fwrite("[gameserver_route.erl] Decoded_current_grid_as_list : ~p.~n", [Decoded_current_grid_as_list]),
-    % Decoded_current_grid_as_integers = [ element(1, string:to_integer(Substr)) || Substr <- string:tokens(Decoded_current_grid_as_list, ",")],
-    % io:fwrite("[gameserver_route.erl] Decoded_current_grid_as_integers: ~p.~n", [Decoded_current_grid_as_integers]),
-
     Decoded_current_grid.

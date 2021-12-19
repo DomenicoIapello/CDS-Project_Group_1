@@ -41,7 +41,7 @@ start() ->
 %% -------------------------------------------------------------------------
 analyze_grid(DecodedData) ->
     % post: player one can make a move?
-    io:fwrite("[playertwo_process.erl (pid=~p)] game server sent current grid ~p.~n", [self(), DecodedData]),
+    io:fwrite("[playertwo_process.erl (pid=~p)] game server sent current grid.~n", [self()]),
     gen_server:call(?MODULE, {post, DecodedData}).
 
 %% -------------------------------------------------------------------------
@@ -119,10 +119,9 @@ init([]) ->
 %% @spec
 %% @end
 %% -------------------------------------------------------------------------
-handle_call({post, DecodedData}, {Pid, Tag}, Grid) ->
+handle_call({post, DecodedData}, {Pid, _Tag}, _Grid) ->
     % handle_call is invoked in response to gen_server:call
-    io:fwrite("[playertwo_process.erl] handle call: internal state of the gen_server process (current ttt grid): ~p.~n", [Grid]),
-    io:fwrite("[playertwo_process.erl (pid=~p)] handle call: from pid=~p, tag=~p.~n", [self(), Pid, Tag]),
+    io:fwrite("[playertwo_process.erl (pid=~p)] handle call: from pid=~p.~n", [self(), Pid]),
     NewGrid = DecodedData,
     Response = ttt(DecodedData),
     {reply, {Response, 201}, NewGrid};  % Response is the data that can be used/read. NewGrid is the NewState: https://www.erlang.org/doc/man/gen_server.html#Module:handle_call-3

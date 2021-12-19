@@ -21,8 +21,8 @@
 -behaviour(application).
 
 -export([start/2, stop/1]).
--export([init_gameserver/0]). %, init_playerone/0, init_playertwo/0]).
--export([hi/1]).
+% -export([start_gameserver/0]). %, init_playerone/0, init_playertwo/0]).
+% -export([hi/1]).
 
 -define(PORT_BACKEND, 8080).
 
@@ -64,10 +64,10 @@ start(normal, []) ->
                                         cowboy_handler]}),
     io:fwrite("[app] Cowboy is listening on port ~p for connections using TCP...~n", [?PORT_BACKEND]),
 
-    {ok, PidGameServer} = gameserver_process:start(name, limit, self(), mfa),
-    register(gameserver, PidGameServer),
+    % {ok, PidGameServer} = gameserver_process:start(name, limit, self(), mfa),
+    % register(gameserver, PidGameServer),
     % init_gameserver(),
-    hi("App is doing crazy stuffs, and is about to start a tree!"),
+    % hi("App is doing crazy stuffs, and is about to start a tree!"),
 
     ttt_sup:start_link("ttt_sup", 1, {});
 
@@ -109,13 +109,15 @@ stop(_State) ->
 %%% INTERFACE
 %%% ==========================================================================
 %% @TODO: do we need anything here?
-init_gameserver() ->
-    gameserver_process:init_gameserver().
-% init_playerone() ->
-%     playerone_process:init().
-% init_playertwo() ->
-%     playertwo_process:init().
+
+% REMARK: we want to spawn/start the process! not init() initialise its state (the grid).
+% start_gameserver() ->
+%     gameserver_process:start_gameserver().
+% start_playerone() ->
+%     playerone_process:start_playerone().
+% start_playertwo() ->
+%     playertwo_process:start_playertwo().
 
 
-hi(MyMsg) ->
-    gameserver_process:hi(MyMsg).
+% hi(MyMsg) ->
+%     gameserver_process:hi(MyMsg).

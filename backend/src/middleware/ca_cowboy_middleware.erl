@@ -23,7 +23,7 @@ execute(Req, Env) ->
     {ok, ReqWithCorsHeaders} = set_cors_headers(Req),
     Method = cowboy_req:method(ReqWithCorsHeaders),
 
-    io:fwrite("[middleware (pid~p)]:execute()...with method~p.~n", [self(), Method]),
+    io:fwrite("[middleware (pid~p)]:execute()...~n", [self()]),
 
     case Method of
         <<"OPTIONS">> ->
@@ -31,7 +31,7 @@ execute(Req, Env) ->
             {halt, ReqFinal, Env};
         _ ->
             %% continue as normal
-            io:fwrite("[middleware (pid~p)]:execute()...matched as normal, with Env~p.~n", [self(), Env]),
+            io:fwrite("[middleware (pid~p)]:execute()...matched as normal.~n", [self()]),
             {ok, ReqWithCorsHeaders, Env}
     end.
 

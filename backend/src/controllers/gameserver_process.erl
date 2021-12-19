@@ -32,8 +32,8 @@
 
 %% -------------------------------------------------------------------------
 %% @doc
-%% This lets a user starts a gameserver process
-%% It is a "wrapper" so that a user in her own terminal can start the logic for her
+%% This lets a user initialize the gameserver process.
+%% and behind the hood, the init([]) function is called.
 %%
 %% @spec
 %% @end
@@ -119,6 +119,10 @@ start(Name, Limit, Sup_PID, MFA) ->
 %% init() is called when a connection is made to the server.
 %% Technically speaking, the "Grid" represent the internal State of the server.
 %%
+%% In other words (from the official doc), whenever a gen_server process is 
+%% started using start/3,4, start_monitor/3,4, or start_link/3,4, this function 
+%% is called by the new process to initialize.
+%%
 %% @spec
 %% @end
 %% -------------------------------------------------------------------------
@@ -134,10 +138,10 @@ init([]) ->
 %% @spec
 %% @end
 %% -------------------------------------------------------------------------
-handle_call({DecodedData}, _From, Grid) ->
+handle_call({DecodedData}, _From, _Grid) ->
     % _Grid represent the current grid that the server knows (internal state)
-    io:fwrite("[gameserver_process.erl (pid=~p)]:handle_call multicasts and check for stalemate...(State=~p)~n", [self(), Grid]),
-    NewGrid = DecodedData,  % assume/set the received grid (DecodedData) as the new state of the server (_Grid)
+    io:fwrite("[gameserver_process.erl (pid=~p)]:handle_call multicasts and check for stalemate...~n", [self()]),
+    NewGrid = DecodedData,  % set the received grid (DecodedData) as the new state of the server (_Grid)
 
     % multicast (sequentially) to player processes (to check if anyone has won)
     {PlayerOne_status, _} = playerone_process:analyze_grid(DecodedData), 
@@ -145,12 +149,9 @@ handle_call({DecodedData}, _From, Grid) ->
     % check if grid has any empty cells or not (stalemate)
     Stalemate_status = check_stalemate(DecodedData),
 
-    % waiting time to "ensure" players' answer are received
-    % timer:sleep(100)
-
     % compile the answer from player processes and stalemate status
     Response = [PlayerOne_status, PlayerTwo_status, Stalemate_status],
-    io:fwrite("[gameserver_process.erl]:response = ~p. (With 1 or 0, true/false, for {player one wins, player two wins, empty cells available}).~n", [Response]),
+    io:fwrite("[gameserver_process.erl]:response = ~p. (With 1 or 0 as true/false, for {player one wins, player two wins, empty cells available}).~n", [Response]),
     {reply, {Response, 201}, NewGrid};  
 
 handle_call({userInteract, initProcess}, _From, Grid) ->
