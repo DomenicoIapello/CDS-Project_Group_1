@@ -15,4 +15,3 @@ In the project directory, you can run:
 ### `npm start`
 
 Runs the app in the development mode and launches the electron app in a new window.\
-Remark: the view is not as usual in the [http://localhost:3000](http://localhost:3000).
