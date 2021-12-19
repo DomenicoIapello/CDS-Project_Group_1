@@ -1,6 +1,6 @@
 .table {
-  width: 900px;
-  height: 900px;
+  width: 450px;
+  height: 450px;
   background-color: rgb(58,58,58);
 }
 
@@ -19,9 +19,9 @@
 .cellbutton{
   background-color: white;
   color: rgb(0, 0, 0);
-  font-size: 150px;
-  width: 290px;
-  height: 290px;
+  font-size: 75px;
+  width: 145px;
+  height: 145px;
 }
 
 body {
@@ -32,12 +32,18 @@ body {
   margin-right: 135px;
   }
 
-#reset {
-  display: block;
-  border: 2px solid rgb(183, 65, 14);
-  border-radius: 5px;
-  background-color: rgb(58,58,58);
-  color: rgb(183, 65, 14);
-  padding: 5px 5px;
-  font-size: 25px;
-  }
+.player1{
+  background-color: sandybrown;
+  color: rgb(0, 0, 0);
+  font-size: 75px;
+  width: 145px;
+  height: 145px;
+}
+
+.player2{
+  background-color: cadetblue;
+  color: rgb(0, 0, 0);
+  font-size: 75px;
+  width: 145px;
+  height: 145px;
+}

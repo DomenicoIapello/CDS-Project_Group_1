@@ -15,6 +15,14 @@ var myMenu = menu.buildFromTemplate([
         }
         
     },
+    {
+        label: 'Reset game',
+        click(){
+            url = 'file://' + __dirname + '/frontend.html';
+            mainWindow.loadURL(url);
+        }
+        
+    },
     {   
         label: 'Endgame',
         click() {
@@ -33,7 +41,10 @@ app.on('window-all-closed', function(){
 });
 
 app.on('ready', function(){
-    mainWindow = new BrowserWindow({width: 1200, height: 1400});
+    mainWindow = new BrowserWindow({
+        width: 750,
+        height: 1000,
+        icon: __dirname + '/icons/256x256.png'});
     url = 'file://' + __dirname + '/frontend.html';
     mainWindow.loadURL(url);
     mainWindow.on('closed', function(){
