@@ -1,7 +1,6 @@
 # Distributed Tic Tac Toe
 
 ## Description
------
 The project is a Distributed Tic Tac Toe that can be played in a browser. It is developed in Erlang for the backend, and with Electron App for the frontend.
 
 In the current directory, you have access to archived/tarball of both the backend and frontend are available in his directory. You also have access to the source code in the subfolder [backend](./backend/) and [frontend](./frontend/) respectively.
@@ -9,7 +8,6 @@ In the current directory, you have access to archived/tarball of both the backen
 Please see next sections for full instructions.
 
 ## Getting Ready
------
 
 Clone with HTTPS
 
@@ -24,7 +22,6 @@ $ git clone git@github.com:DomenicoIapello/CDS-Project_Group_1.git
 </pre>
 
 ## Project directory structure
------
 
 <pre>
 ├── backend
@@ -60,7 +57,7 @@ $ git clone git@github.com:DomenicoIapello/CDS-Project_Group_1.git
 
 
 ## Run
------
+
 Follow the README respectively for the [backend](./backend/README.md) and the [frontend](./frontend/README.md).
 
 Instructions to use and deploy our code:
