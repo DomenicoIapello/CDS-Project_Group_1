@@ -36,7 +36,7 @@ Please see next sections for full instructions.
 │   ├── README.md
 │   ├── stylesheet.css
 │   └── ttt.js
-├── frontend_executable.exe
+├── AgeofTicTacToe Setup 1.0.0.exe
 ├── backend_tarball.tar.gz
 └── README.md
 </pre>
@@ -56,7 +56,7 @@ Instructions to use and deploy our code:
   - subfolder: `backend`
   - subfolder: `frontend`
   - file: `README.md`, (contains these instructions as well)
-  - frontend’s archived executable: `ttt-frontend-0.1.0.zip`,
+  - frontend’s executable: `AgeofTicTacToe Setup 1.0.0.exe`,
   - backend’s tarball:  `ttt-backend-0.1.0.tar.gz`
 - Prepare the backend by either
   - Going into the subfolder `backend` and manually building it with Rebar3 instructions.
@@ -68,5 +68,5 @@ Instructions to use and deploy our code:
     $ bin/ttt console</pre>
   - You now should have a running backend, with three processes launched, an HTTP server listening carefully.
  - Prepare the frontend
-   - Install the "AgeOfTicTacToe Setup 1.0.0.exe" on your computer and start the application. 
+   - Install the `AgeOfTicTacToe Setup 1.0.0.exe` on your computer and start the application. 
  - Enjoy!
