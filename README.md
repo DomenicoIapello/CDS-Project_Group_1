@@ -82,6 +82,5 @@ Instructions to use and deploy our code:
     $ bin/ttt console</pre>
   - You now should have a running backend, with three processes launched, an HTTP server listening carefully.
  - Prepare the frontend
-   - unzip the compressed file `frontend_executable`. You can move it wherever you want as long as it has access to the localhost still)
-   - navigate to `/win-unpacked/` and launch the executable `age_of_tictactoe.exe`. This will launch an Electron app / window. 
+   - Install the "AgeOfTicTacToe.exe" on your computer and start the application. 
  - Enjoy!
