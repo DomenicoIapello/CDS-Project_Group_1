@@ -4,11 +4,23 @@
 -----
 The project is a Distributed Tic Tac Toe that can be played in a browser. It is developed in Erlang for the backend, and with Electron App for the frontend.
 
+In the current directory, you have access to archived/tarball of both the backend and frontend are available in his directory. You also have access to the source code in the subfolder [backend](./backend/) and [frontend](./frontend/) respectively.
+
+Please see next sections for full instructions.
+
 ## Getting Ready
 -----
 
+Clone with HTTPS
+
 <pre>
-$ git clone this_repository_http_or_ssh
+$ git clone https://github.com/DomenicoIapello/CDS-Project_Group_1.git
+</pre>
+
+or with SSH
+
+<pre>
+$ git clone git@github.com:DomenicoIapello/CDS-Project_Group_1.git
 </pre>
 
 ## Project directory structure
@@ -34,10 +46,13 @@ $ git clone this_repository_http_or_ssh
 │   ├── rebar.config
 │   └── rebar.lock
 ├── frontend
-│   ├── ...
+│   ├── frontend.html
+│   ├── main.js
+│   ├── package.json
+│   ├── package-lock.json
 │   ├── README.md
-│   ├── ...
-│   └── ...
+│   ├── stylesheet.css
+│   └── ttt.js
 ├── frontend_executable.exe
 ├── backend_tarball.tar.gz
 └── README.md
@@ -58,16 +73,18 @@ Instructions to use and deploy our code:
   - subfolder: `backend`
   - subfolder: `frontend`
   - file: `README.md`, (contains these instructions as well)
-  - frontend’s executable: `age_of_tictactoe.exe`,
-  - backend’s tarball:  `ttt-0.1.0.tar.gz`
+  - frontend’s archived executable: `ttt-frontend-0.1.0.zip`,
+  - backend’s tarball:  `ttt-backend-0.1.0.tar.gz`
 - Prepare the backend by either
   - Going into the subfolder `backend` and manually building it with Rebar3 instructions.
-  - Or (recommended) use the `ttt-0.1.0.tar.gz`. Unpack where you prefer. A lengthy example would be:
+  - Or (recommended) use the `ttt-backend-0.1.0.tar.gz`. Unpack where you prefer. A lengthy example would be:
     <pre>$ cd ..
     $ mkdir ttt_backend
     $ cd ttt_backend
     $ tar -zxvf ttt-0.1.0.tar.gz
     $ bin/ttt console</pre>
   - You now should have a running backend, with three processes launched, an HTTP server listening carefully.
- - Once the backend is running and live, launch the frontend executable (you can move it wherever you want as long as it has access to the localhost still). This will launch an Electron app / window. 
+ - Prepare the frontend
+   - unzip the compressed file `frontend_executable`. You can move it wherever you want as long as it has access to the localhost still)
+   - navigate to `/win-unpacked/` and launch the executable `age_of_tictactoe.exe`. This will launch an Electron app / window. 
  - Enjoy!
