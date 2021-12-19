@@ -1,4 +1,4 @@
-Erlang Project Skeleton
+Tic Tac Toe - Backend
 =====
 First install rebar3 by following the [Getting started guide](https://rebar3.readme.io/docs/getting-started) in rebar3 documentation.
 
