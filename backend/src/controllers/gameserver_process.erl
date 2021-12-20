@@ -18,7 +18,7 @@
 
 % API
 -export([start/4]).
--export([init_gameserver/0, analyze_post_request/1, get_intial_grid/0]).
+-export([analyze_post_request/1, get_intial_grid/0]).
 % Game Logic
 -export([check_stalemate/1]).
 % gen_server callbacks
@@ -28,17 +28,6 @@
 %%% ==========================================================================
 %%% API
 %%% ==========================================================================
-
-%% -------------------------------------------------------------------------
-%% @doc
-%% This lets a user initialize the gameserver process.
-%% and behind the hood, the init([]) function is called.
-%%
-%% @spec
-%% @end
-%% -------------------------------------------------------------------------
-init_gameserver() ->
-    gen_server:call({global, ?MODULE}, {userInteract, initProcess}).
 
 %% -------------------------------------------------------------------------
 %% @doc
@@ -142,13 +131,6 @@ handle_call({DecodedData}, _From, _Grid) ->
     io:fwrite("[gameserver_process.erl]:response = ~p. (With 1 or 0 as true/false, for {player one wins, player two wins, empty cells available}).~n", [Response]),
     {reply, {Response, 201}, NewGrid};  
 
-handle_call({userInteract, initProcess}, _From, Grid) ->
-    init([]),
-    {reply, gridInitiated, Grid};
-
-handle_call({msg, MyMsg}, _From, Grid) ->
-    io:fwrite("[gameserver_process] handle_call says ~p.~n", [MyMsg]),
-    {reply, response, Grid};
 
 handle_call({}, _From, Grid) ->
     Response = {current_grid, Grid},
